@@ -58,133 +58,124 @@
                 </div>
             </header>
 
-            <div class="overview-grid">
-                <div class="stat-card">
-                    <div class="stat-info">
-                        <p>Total Barang</p>
-                        <h3 id="total-barang">2</h3>
+            <div id="dashboard-section" class="page-section active">
+                <div class="overview-grid">
+                    <div class="stat-card">
+                        <div class="stat-info">
+                            <p>Total Barang</p>
+                            <h3 id="total-barang">2</h3>
+                        </div>
+                        <div class="stat-icon icon-blue"><i class="fa-solid fa-box"></i></div>
                     </div>
-                    <div class="stat-icon icon-blue"><i class="fa-solid fa-box"></i></div>
+                    <div class="stat-card">
+                        <div class="stat-info">
+                            <p>Stok Rendah</p>
+                            <h3 id="stok-rendah">0</h3>
+                        </div>
+                        <div class="stat-icon icon-orange"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-info">
+                            <p>Transaksi Hari Ini</p>
+                            <h3 id="transaksi-hari-ini">0</h3>
+                        </div>
+                        <div class="stat-icon icon-green"><i class="fa-solid fa-file-invoice"></i></div>
+                    </div>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-info">
-                        <p>Stok Rendah</p>
-                        <h3 id="stok-rendah">0</h3>
+
+                <div class="content-grid">
+                    <div class="table-container">
+                        <div class="table-header">
+                            <h2>Aktivitas Transaksi Terbaru</h2>
+                            <button class="btn-refresh" id="btn-refresh">
+                                <i class="fa-solid fa-arrows-rotate"></i> Refresh
+                            </button>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>TANGGAL & WAKTU</th>
+                                        <th>BARANG</th>
+                                        <th>TIPE</th>
+                                        <th>QTY</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="transaction-table-body">
+                                    <tr>
+                                        <td>
+                                            <span class="date-row"><i class="fa-regular fa-calendar-days"></i> 26/05/2026</span>
+                                            <span class="time-row"><i class="fa-regular fa-clock"></i> 16:44</span>
+                                        </td>
+                                        <td>Pipa PVC 4"</td>
+                                        <td><span class="badge badge-out">KELUAR</span></td>
+                                        <td class="qty-out">2</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
-                    <div class="stat-icon icon-orange"><i class="fa-solid fa-triangle-exclamation"></i></div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-info">
-                        <p>Transaksi Hari Ini</p>
-                        <h3 id="transaksi-hari-ini">0</h3>
+
+                    <div class="quick-actions">
+                        <h2>Aksi Cepat</h2>
+                        <div class="actions-grid">
+                            <button class="btn-action btn-blue"><i class="fa-solid fa-circle-plus"></i> Transaksi Baru</button>
+                            <button class="btn-action btn-green"><i class="fa-solid fa-boxes-stacked"></i> Tambah Barang</button>
+                            <button class="btn-action btn-purple"><i class="fa-solid fa-file-export"></i> Export Data</button>
+                            <button class="btn-action btn-dark"><i class="fa-solid fa-arrows-rotate"></i> Sync Stok</button>
+                        </div>
                     </div>
-                    <div class="stat-icon icon-green"><i class="fa-solid fa-file-invoice"></i></div>
                 </div>
             </div>
 
-            <div class="content-grid">
+            <div id="inventori-section" class="page-section" style="display: none;">
+                <div class="inventori-header">
+                    <div>
+                        <h2>Manajemen Inventori</h2>
+                        <p style="color: var(--text-muted); font-size: 14px; margin-top: 5px;">Kelola semua barang dalam sistem</p>
+                    </div>
+                    
+                    <div class="inventori-actions">
+                        <div class="search-box">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                            <input type="text" id="search-input" placeholder="Cari SKU atau nama...">
+                        </div>
+                        <button class="btn-export"><i class="fa-solid fa-file-export"></i> Export</button>
+                        <button class="btn-sync"><i class="fa-solid fa-rotate"></i> Sync Stok</button>
+                    </div>
+                </div>
+
                 <div class="table-container">
-                    <div class="table-header">
-                        <h2>Aktivitas Transaksi Terbaru</h2>
-                        <button class="btn-refresh" id="btn-refresh">
-                            <i class="fa-solid fa-arrows-rotate"></i> Refresh
-                        </button>
-                    </div>
-                    <div class="table-responsive">
-                        <table class="data-table">
-                            <thead>
-                                <tr>
-                                    <th>TANGGAL & WAKTU</th>
-                                    <th>BARANG</th>
-                                    <th>TIPE</th>
-                                    <th>QTY</th>
-                                </tr>
-                            </thead>
-                            <tbody id="transaction-table-body">
-                                <tr>
-                                    <td>
-                                        <span class="date-row"><i class="fa-regular fa-calendar-days"></i> 26/05/2026</span>
-                                        <span class="time-row"><i class="fa-regular fa-clock"></i> 16:44</span>
-                                    </td>
-                                    <td>Pipa PVC 4"</td>
-                                    <td><span class="badge badge-out">KELUAR</span></td>
-                                    <td class="qty-out">2</td>
-                                </tr>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>BARANG</th>
+                                <th>KATEGORI</th>
+                                <th>LOKASI</th>
+                                <th>STOK / MIN</th>
+                                <th>STATUS</th>
+                                <th>AKSI</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabel-inventori-body">
                             </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <div class="quick-actions">
-                    <h2>Aksi Cepat</h2>
-                    <div class="actions-grid">
-                        <button class="btn-action btn-blue"><i class="fa-solid fa-circle-plus"></i> Transaksi Baru</button>
-                        <button class="btn-action btn-green"><i class="fa-solid fa-boxes-stacked"></i> Tambah Barang</button>
-                        <button class="btn-action btn-purple"><i class="fa-solid fa-file-export"></i> Export Data</button>
-                        <button class="btn-action btn-dark"><i class="fa-solid fa-arrows-rotate"></i> Sync Stok</button>
-                    </div>
+                    </table>
                 </div>
             </div>
-
-            <main class="main-content">
-    
-    <div id="dashboard-section" class="page-section active">
-        </div>
-
-    <div id="inventori-section" class="page-section" style="display: none;">
-        
-        <div class="inventori-header">
-            <div>
-                <h2>Manajemen Inventori</h2>
-                <p style="color: var(--text-muted); font-size: 14px; margin-top: 5px;">Kelola semua barang dalam sistem</p>
-            </div>
-            
-            <div class="inventori-actions">
-                <div class="search-box">
-                    <i class="fa-solid fa-magnifying-glass"></i>
-                    <input type="text" id="search-input" placeholder="Cari SKU atau nama...">
-                </div>
-                <button class="btn-export"><i class="fa-solid fa-file-export"></i> Export</button>
-                <button class="btn-sync"><i class="fa-solid fa-rotate"></i> Sync Stok</button>
-            </div>
-        </div>
-
-        <div class="table-container">
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th>BARANG</th>
-                        <th>KATEGORI</th>
-                        <th>LOKASI</th>
-                        <th>STOK / MIN</th>
-                        <th>STATUS</th>
-                        <th>AKSI</th>
-                    </tr>
-                </thead>
-                <tbody id="tabel-inventori-body">
-                    </tbody>
-            </table>
-        </div>
-
-    </div>
-</main>
         </main>
     </div>
 
     <script src="script.js"></script>
-    
     <script>
         const sidebar = document.querySelector('.sidebar');
         const sidebarToggle = document.getElementById('sidebar-toggle');
         const overlay = document.getElementById('sidebar-overlay');
 
-        // Fungsi pemicu buka-tutup
         function toggleSidebar() {
             sidebar.classList.toggle('active');
             overlay.classList.toggle('active');
         }
 
-        // Jalankan fungsi saat tombol hamburger atau lapisan gelap diklik
         if (sidebarToggle && overlay) {
             sidebarToggle.addEventListener('click', toggleSidebar);
             overlay.addEventListener('click', toggleSidebar);
