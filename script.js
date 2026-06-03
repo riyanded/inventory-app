@@ -1,19 +1,23 @@
 // ==========================================
 // 1. KONFIGURASI API
 // ==========================================
-// Jika Anda belum menggunakan Vercel Proxy (Langkah Keamanan), gunakan URL Apps Script langsung seperti ini:
 const API_URL = "https://script.google.com/macros/s/AKfycbyPrlCNCf0Qb5pj71G_9YSx_-aD7hOVzpMN8h_9slDk3eCzJgqOVdOjndu9QmdWEyc5/exec";
 
+// Variabel Global (Brankas Penyimpanan Data Utama)
+let globalInventoryData = [];       // Menyimpan database semua barang dari Sheets
+let transactionCart = [];           // Menyimpan daftar barang yang masuk keranjang transaksi
+let selectedProduct = null;         // Menyimpan data produk yang sedang terpilih sementara
+
 // ==========================================
-// 2. LOGIKA FETCH DATA (MENARIK DATA)
+// 2. LOGIKA FETCH DASHBOARD (Mendapatkan Data Ringkasan)
 // ==========================================
 async function fetchDashboardData() {
-    // Tampilan indikator loading saat mengambil data
     document.getElementById('total-barang').innerText = '...';
     document.getElementById('stok-rendah').innerText = '...';
     document.getElementById('transaksi-hari-ini').innerText = '...';
     
-    const tabelBody = document.getElementById('tabel-dashboard-transaksi');
+    // PERBAIKAN: Menyesuaikan dengan ID tabel di HTML Anda (transaction-table-body)
+    const tabelBody = document.getElementById('transaction-table-body');
     if (tabelBody) {
         tabelBody.innerHTML = `<tr><td colspan="4" style="text-align:center; color: var(--text-muted);">Memuat data dari server...</td></tr>`;
     }
@@ -22,23 +26,18 @@ async function fetchDashboardData() {
         const response = await fetch(API_URL);
         const data = await response.json();
 
-        // Cek apakah data.total_barang ada di dalam JSON yang diterima
         if (data.total_barang !== undefined) {
-            
-            // A. Update 3 Kartu Angka Utama (Disesuaikan dengan format JSON dari backend Anda)
             document.getElementById('total-barang').innerText = data.total_barang || 0;
             document.getElementById('stok-rendah').innerText = data.stok_rendah || 0;
             document.getElementById('transaksi-hari-ini').innerText = data.transaksi_hari_ini || 0;
 
-            // B. Update Tabel Aktivitas Transaksi Terbaru (Disesuaikan menjadi data.transaksi)
             if (tabelBody && data.transaksi) {
-                tabelBody.innerHTML = ''; // Bersihkan tulisan "Memuat data..."
+                tabelBody.innerHTML = ''; 
 
                 if (data.transaksi.length === 0) {
                     tabelBody.innerHTML = `<tr><td colspan="4" style="text-align:center; color: var(--text-muted);">Belum ada aktivitas transaksi terbaru</td></tr>`;
                 } else {
                     data.transaksi.forEach(trx => {
-                        // Tentukan warna badge (Merah untuk KELUAR, Hijau untuk MASUK)
                         const isKeluar = trx.tipe.toUpperCase() === 'KELUAR';
                         const badgeClass = isKeluar ? 'badge-out' : 'badge-in';
                         const qtyText = isKeluar ? `<span class="qty-out">-${trx.qty}</span>` : `<span class="qty-in" style="color: var(--color-green); font-weight: bold;">+${trx.qty}</span>`;
@@ -64,156 +63,25 @@ async function fetchDashboardData() {
         document.getElementById('total-barang').innerText = 'Err';
         document.getElementById('stok-rendah').innerText = 'Err';
         document.getElementById('transaksi-hari-ini').innerText = 'Err';
-        
         if (tabelBody) {
-            tabelBody.innerHTML = `<tr><td colspan="4" style="text-align:center; color: var(--color-red);">Gagal terhubung ke database. Periksa URL Apps Script Anda.</td></tr>`;
+            tabelBody.innerHTML = `<tr><td colspan="4" style="text-align:center; color: var(--color-red);">Gagal terhubung ke database.</td></tr>`;
         }
     }
 }
 
-// Tombol Refresh untuk memanggil ulang data
+// Tombol Refresh Ringkasan
 const btnRefresh = document.getElementById('btn-refresh');
 if (btnRefresh) {
     btnRefresh.addEventListener('click', fetchDashboardData);
 }
 
 // ==========================================
-// 3. LOGIKA DARK / LIGHT MODE
-// ==========================================
-const themeToggleBtn = document.getElementById('theme-toggle');
-const body = document.body;
-const themeIcon = themeToggleBtn.querySelector('i');
-
-// Cek preferensi tema sebelumnya di browser
-if (localStorage.getItem('theme') === 'light') {
-    body.classList.add('light-mode');
-    themeIcon.classList.replace('fa-moon', 'fa-sun');
-}
-
-themeToggleBtn.addEventListener('click', () => {
-    body.classList.toggle('light-mode');
-    
-    if (body.classList.contains('light-mode')) {
-        localStorage.setItem('theme', 'light');
-        themeIcon.classList.replace('fa-moon', 'fa-sun');
-    } else {
-        localStorage.setItem('theme', 'dark');
-        themeIcon.classList.replace('fa-sun', 'fa-moon');
-    }
-});
-
-// ==========================================
-// 4. LOGIKA DROPDOWN PROFIL & LOGIN MULTILEVEL
-// ==========================================
-const profileMenu = document.getElementById('profile-menu');
-const dropdownMenu = document.getElementById('dropdown-menu');
-const btnLogin = document.getElementById('btn-login');
-const btnLogout = document.getElementById('btn-logout');
-const userName = document.getElementById('user-name');
-const userRole = document.getElementById('user-role');
-
-// Buka/Tutup menu profil
-profileMenu.addEventListener('click', (e) => {
-    if (e.target.closest('.dropdown-menu') === null) {
-        dropdownMenu.classList.toggle('active');
-    }
-});
-
-// Tutup menu profil jika klik di luar area menu
-document.addEventListener('click', (e) => {
-    if (!profileMenu.contains(e.target)) {
-        dropdownMenu.classList.remove('active');
-    }
-});
-
-// Simulasi Login Admin
-btnLogin.addEventListener('click', (e) => {
-    e.preventDefault();
-    userName.innerText = "Admin Inventory";
-    userRole.innerText = "Super Admin";
-    userRole.style.backgroundColor = "rgba(16, 185, 129, 0.2)"; 
-    userRole.style.color = "var(--color-green)";
-    
-    btnLogin.style.display = "none";
-    btnLogout.style.display = "flex";
-    dropdownMenu.classList.remove('active');
-});
-
-// Simulasi Logout
-btnLogout.addEventListener('click', (e) => {
-    e.preventDefault();
-    userName.innerText = "Tamu";
-    userRole.innerText = "Belum Login";
-    userRole.style.backgroundColor = "var(--border-color)";
-    userRole.style.color = "var(--text-muted)";
-    
-    btnLogin.style.display = "flex";
-    btnLogout.style.display = "none";
-    dropdownMenu.classList.remove('active');
-});
-
-// ==========================================
-// 5. INISIALISASI SAAT HALAMAN DIMUAT
-// ==========================================
-window.addEventListener('DOMContentLoaded', fetchDashboardData);
-
-// ==========================================
-// 6. LOGIKA NAVIGASI MENU (DASHBOARD & INVENTORI)
-// ==========================================
-document.addEventListener('DOMContentLoaded', () => {
-    const menuDashboard = document.getElementById('menu-dashboard'); 
-    const menuInventori = document.getElementById('menu-inventori'); 
-    
-    const sectionDashboard = document.getElementById('dashboard-section');
-    const sectionInventori = document.getElementById('inventori-section');
-    const pageTitle = document.getElementById('page-title'); // Mengambil elemen judul header
-
-    function switchPage(page) {
-        // A. Reset semua status menu menjadi tidak aktif
-        if (menuDashboard) menuDashboard.classList.remove('active');
-        if (menuInventori) menuInventori.classList.remove('active');
-
-        // B. Logika perpindahan halaman
-        if (page === 'dashboard') {
-            // Tampilkan section dashboard
-            sectionDashboard.classList.add('active');
-            sectionInventori.classList.remove('active');
-            
-            // Nyalakan menu dashboard dan ubah judul header
-            if (menuDashboard) menuDashboard.classList.add('active');
-            if (pageTitle) pageTitle.innerText = "Dashboard"; 
-            
-        } else if (page === 'inventori') {
-            // Tampilkan section inventori
-            sectionDashboard.classList.remove('active');
-            sectionInventori.classList.add('active');
-            
-            // Nyalakan menu inventori dan ubah judul header
-            if (menuInventori) menuInventori.classList.add('active');
-            if (pageTitle) pageTitle.innerText = "Manajemen Inventori"; 
-            
-            // Panggil fungsi untuk mengambil data asli dari Spreadsheet
-            fetchInventoryData(); 
-        }
-    }
-
-    // Pasang aksi klik pada menu
-    if (menuDashboard) menuDashboard.addEventListener('click', (e) => { e.preventDefault(); switchPage('dashboard'); });
-    if (menuInventori) menuInventori.addEventListener('click', (e) => { e.preventDefault(); switchPage('inventori'); });
-});
-
-// ==========================================
-// VARIABEL GLOBAL (Brankas Data)
-// ==========================================
-let globalInventoryData = [];
-
-// ==========================================
-// 1. FUNGSI UTAMA: AMBIL DATA DARI SPREADSHEET
+// 3. LOGIKA FETCH DATA INVENTORI (Tabel Stok)
 // ==========================================
 async function fetchInventoryData() {
     const tbody = document.getElementById('tabel-inventori-body');
-    const totalBarangEl = document.getElementById('total-barang-count'); 
-    const stokRendahEl = document.getElementById('stok-rendah-count');
+    const totalBarangEl = document.getElementById('total-barang'); 
+    const stokRendahEl = document.getElementById('stok-rendah');
 
     if (tbody) tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding: 20px;">Memuat data...</td></tr>`;
 
@@ -221,14 +89,11 @@ async function fetchInventoryData() {
         const response = await fetch(API_URL);
         const rawData = await response.json();
         
-        // Update Dashboard
         if (totalBarangEl) totalBarangEl.innerText = rawData.total_barang || 0;
         if (stokRendahEl) stokRendahEl.innerText = rawData.stok_rendah || 0;
 
-        // Simpan data barang ke Brankas Global
+        // Simpan data barang ke dalam brankas global
         globalInventoryData = rawData.barang || [];
-        
-        // Tampilkan data
         renderTable(globalInventoryData);
 
     } catch (error) {
@@ -237,9 +102,6 @@ async function fetchInventoryData() {
     }
 }
 
-// ==========================================
-// 2. FUNGSI RENDER TABEL (Tampilkan Data)
-// ==========================================
 function renderTable(items) {
     const tbody = document.getElementById('tabel-inventori-body');
     if (!tbody) return;
@@ -267,7 +129,6 @@ function renderTable(items) {
         const stokColor = isRendah ? "color: #e63946; font-weight: bold;" : "color: #1e293b; font-weight: bold;";
         const progressColor = isRendah ? "#e63946" : "#2bc47a";
 
-        // Perhatikan bagian tombol Aksi di bawah, saya tambahkan event onclick()
         rows += `
             <tr>
                 <td>
@@ -288,143 +149,419 @@ function renderTable(items) {
                 <td style="vertical-align: middle;"><span style="${badgeStyle}">${statusText}</span></td>
                 <td style="vertical-align: middle; font-size: 16px;">
                     <a href="#" onclick="editBarang('${sku}', '${nama}')" style="color: #4361ee; margin-right: 12px;" title="Edit"><i class="fa-solid fa-pen-to-square"></i></a>
-                    <a href="#" onclick="transaksiBarang('${sku}', '${nama}')" style="color: #4361ee;" title="Transaksi"><i class="fa-solid fa-right-left"></i></a>
+                    <a href="#" onclick="transaksiCepatBarang('${sku}')" style="color: #4361ee;" title="Transaksi"><i class="fa-solid fa-right-left"></i></a>
                 </td>
             </tr>
         `;
     });
-
     tbody.innerHTML = rows;
 }
 
-// ==========================================
-// 3. FITUR PENCARIAN (Search Bar)
-// ==========================================
+// Fitur Pencarian di Halaman Inventori
 const searchInput = document.getElementById('searchInput');
 if (searchInput) {
     searchInput.addEventListener('input', function(e) {
         const keyword = e.target.value.toLowerCase();
-        
-        // Filter data di brankas berdasarkan nama atau SKU
         const filteredData = globalInventoryData.filter(item => {
-            const nama = (item.nama || '').toLowerCase();
-            const sku = (item.id || '').toLowerCase();
-            return nama.includes(keyword) || sku.includes(keyword);
+            return (item.nama || '').toLowerCase().includes(keyword) || (item.id || '').toLowerCase().includes(keyword);
         });
-        
-        // Tampilkan ulang tabel dengan data hasil filter
         renderTable(filteredData);
     });
 }
 
-// ==========================================
-// 4. FITUR SYNC STOK
-// ==========================================
+// Sync Stok Button
 const btnSync = document.getElementById('btnSync');
 if (btnSync) {
     btnSync.addEventListener('click', function(e) {
-        e.preventDefault(); // Mencegah halaman refresh
-        
-        // Efek visual tombol sedang loading (opsional)
+        e.preventDefault();
         const originalText = this.innerHTML;
         this.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Syncing...';
-        
-        // Panggil ulang fungsi ambil data
         fetchInventoryData().then(() => {
-            // Kembalikan teks tombol setelah selesai
             setTimeout(() => { this.innerHTML = originalText; }, 500);
         });
     });
 }
 
 // ==========================================
-// 5. FITUR EXPORT KE CSV
+// 4. INTEGRASI LOGIKA PENCARIAN FORM & KERANJANG (TRANSAKSI)
 // ==========================================
+let previewLabel, cartContainer;
+
+function inisialisasiElemenKeranjang() {
+    const searchGroup = document.querySelector('.search-item-group');
+    const addGroup = document.querySelector('.add-item-group');
+
+    if (searchGroup && !document.getElementById('tx-product-preview')) {
+        previewLabel = document.createElement('div');
+        previewLabel.id = 'tx-product-preview';
+        previewLabel.style = 'font-size: 12px; margin-top: 4px; font-weight: 500; min-height: 18px; transition: 0.2s;';
+        searchGroup.parentNode.insertBefore(previewLabel, searchGroup.nextSibling);
+    }
+
+    if (addGroup && !document.getElementById('tx-cart-container')) {
+        cartContainer = document.createElement('div');
+        cartContainer.id = 'tx-cart-container';
+        cartContainer.style = 'margin: 16px 0; padding: 12px; background: #f8fafc; border-radius: 8px; border: 1px dashed #cbd5e1;';
+        addGroup.parentNode.insertBefore(cartContainer, addGroup.nextSibling);
+        renderKeranjang();
+    }
+}
+
+// Logika 1: Cari Barang untuk Transaksi (SKU / Nama)
+function cariBarangTransaksi() {
+    const txSearchInput = document.querySelector('.search-item-group input');
+    if (!txSearchInput) return;
+
+    const keyword = txSearchInput.value.trim().toLowerCase();
+    if (!keyword) {
+        alert("Silakan ketik SKU atau Nama Barang!");
+        return;
+    }
+
+    // Pastikan database internal sudah terisi data
+    if (globalInventoryData.length === 0) {
+        previewLabel.innerHTML = `<span style="color: #e63946;"><i class="fa-solid fa-triangle-exclamation"></i> Database kosong, silakan klik menu "Inventori" dahulu untuk sinkronisasi.</span>`;
+        return;
+    }
+
+    const barangDitemukan = globalInventoryData.find(item => {
+        return (item.id || '').toLowerCase() === keyword || (item.nama || '').toLowerCase().includes(keyword);
+    });
+
+    if (barangDitemukan) {
+        selectedProduct = barangDitemukan;
+        previewLabel.innerHTML = `<span style="color: #2bc47a;"><i class="fa-solid fa-circle-check"></i> Terpilih: <strong>${barangDitemukan.nama}</strong> (${barangDitemukan.id}) | Stok saat ini: ${barangDitemukan.stok}</span>`;
+    } else {
+        selectedProduct = null;
+        previewLabel.innerHTML = `<span style="color: #e63946;"><i class="fa-solid fa-circle-xmark"></i> Barang tidak ditemukan di database.</span>`;
+    }
+}
+
+// Logika 2: Masukkan ke Dalam Keranjang
+function tambahKeKeranjang() {
+    if (!selectedProduct) {
+        alert("Pilih barang terlebih dahulu dengan mengetik SKU/Nama lalu tekan Enter/ikon cari!");
+        return;
+    }
+
+    const qtyInput = document.querySelector('.qty-input input');
+    const qty = parseInt(qtyInput ? qtyInput.value : 1);
+
+    if (isNaN(qty) || qty <= 0) {
+        alert("Jumlah (Qty) barang harus valid dan minimal 1!");
+        return;
+    }
+
+    // Validasi aturan Maksimal 5 jenis barang berbeda (Sesuai tulisan di UI)
+    const indexDiKeranjang = transactionCart.findIndex(item => item.id === selectedProduct.id);
+    if (indexDiKeranjang === -1 && transactionCart.length >= 5) {
+        alert("Batas maksimal dalam 1 transaksi hanya boleh 5 jenis barang!");
+        return;
+    }
+
+    if (indexDiKeranjang > -1) {
+        transactionCart[indexDiKeranjang].qty += qty;
+    } else {
+        transactionCart.push({
+            id: selectedProduct.id,
+            nama: selectedProduct.nama,
+            stok: selectedProduct.stok,
+            qty: qty
+        });
+    }
+
+    // Reset kolom input pilihan barang agar siap menscan produk berikutnya
+    const txSearchInput = document.querySelector('.search-item-group input');
+    if (txSearchInput) txSearchInput.value = '';
+    if (qtyInput) qtyInput.value = 1;
+    selectedProduct = null;
+    if (previewLabel) previewLabel.innerHTML = '';
+
+    renderKeranjang();
+}
+
+// Logika 3: Render Tampilan UI Keranjang
+function renderKeranjang() {
+    if (!cartContainer) return;
+
+    if (transactionCart.length === 0) {
+        cartContainer.innerHTML = `<p style="text-align:center; font-size:12px; color:#94a3b8; margin:0;"><i class="fa-solid fa-basket-shopping"></i> Daftar barang transaksi masih kosong.</p>`;
+        return;
+    }
+
+    let html = `<h4 style="font-size:12px; margin:0 0 8px 0; color:#475569; font-weight:600;"><i class="fa-solid fa-list-ol"></i> Daftar Barang Dipilih (${transactionCart.length}/5):</h4>`;
+    html += `<ul style="list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:6px;">`;
+
+    transactionCart.forEach((item, index) => {
+        html += `
+            <li style="display:flex; justify-content:space-between; align-items:center; background:#ffffff; padding:8px 10px; border-radius:6px; border:1px solid #e2e8f0; font-size:13px;">
+                <div>
+                    <strong style="color:#1e293b; display:block;">${item.nama}</strong>
+                    <span style="font-size:11px; color:#94a3b8;">SKU: ${item.id} | Stok: ${item.stok}</span>
+                </div>
+                <div style="display:flex; align-items:center; gap:12px;">
+                    <span style="font-weight:bold; color:#4361ee; font-size:14px;">x${item.qty}</span>
+                    <button onclick="hapusItemKeranjang(${index})" style="background:none; border:none; color:#e63946; cursor:pointer; font-size:14px;" title="Hapus"><i class="fa-solid fa-trash-can"></i></button>
+                </div>
+            </li>
+        `;
+    });
+    html += `</ul>`;
+    cartContainer.innerHTML = html;
+}
+
+// Logika 4: Aksi Hapus Item dari Keranjang
+window.hapusItemKeranjang = function(index) {
+    transactionCart.splice(index, 1);
+    renderKeranjang();
+};
+
+// Logika 5: Submit & Kirim Keranjang ke Google Sheets API
+async function simpanSeluruhTransaksi() {
+    if (transactionCart.length === 0) {
+        alert("Gagal Menyimpan! Tambahkan minimal 1 barang ke dalam daftar transaksi.");
+        return;
+    }
+
+    const tipe = document.getElementById('tipe-transaksi').value; // 'in' atau 'out'
+    let applicant = "", noPo = "", supplier = "", section = "";
+
+    if (tipe === 'in') {
+        applicant = document.querySelector('#form-in-fields input[placeholder="Nama pemohon"]')?.value || "";
+        noPo = document.querySelector('#form-in-fields input[placeholder="Nomor PO"]')?.value || "";
+        supplier = document.querySelector('#form-in-fields input[placeholder="Nama Supplier"]')?.value || "";
+    } else {
+        section = document.querySelector('#form-out-fields input[placeholder="Misal: Gudang A"]')?.value || "";
+        applicant = document.querySelector('#form-out-fields input[placeholder="Nama pemohon"]')?.value || "";
+    }
+
+    const keterangan = document.querySelector('textarea[placeholder="Catatan opsional..."]')?.value || "";
+    const btnSave = document.querySelector('.btn-save-transaksi');
+
+    // Menghimpun payload data JSON
+    const payload = {
+        action: "saveTransaction",
+        tipe: tipe === 'in' ? 'MASUK' : 'KELUAR',
+        applicant: applicant,
+        no_po: noPo,
+        supplier: supplier,
+        section: section,
+        keterangan: keterangan,
+        items: transactionCart
+    };
+
+    const originalText = btnSave.innerHTML;
+    btnSave.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Memproses...';
+    btnSave.disabled = true;
+
+    try {
+        await fetch(API_URL, {
+            method: 'POST',
+            mode: 'no-cors', 
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        alert("Sukses! Transaksi Anda berhasil dicatat ke Google Sheets.");
+
+        // Pembersihan (Reset Form) setelah sukses
+        transactionCart = [];
+        renderKeranjang();
+        document.querySelectorAll('.page-section input[type="text"]').forEach(input => input.value = '');
+        const textarea = document.querySelector('textarea');
+        if (textarea) textarea.value = '';
+
+        // Otomatis perbarui data angka di halaman dashboard
+        fetchDashboardData();
+        fetchInventoryData();
+
+    } catch (error) {
+        console.error("Gagal menyimpan transaksi:", error);
+        alert("Ada gangguan koneksi saat menyimpan transaksi ke Google Sheets.");
+    } finally {
+        btnSave.innerHTML = originalText;
+        btnSave.disabled = false;
+    }
+}
+
+// Shortcut Tombol Aksi Cepat dari Baris Tabel Inventori
+window.transaksiCepatBarang = function(sku) {
+    const menuTransaksi = document.getElementById('menu-transaksi');
+    if (menuTransaksi) menuTransaksi.click();
+    
+    setTimeout(() => {
+        const txSearchInput = document.querySelector('.search-item-group input');
+        if (txSearchInput) {
+            txSearchInput.value = sku;
+            cariBarangTransaksi();
+        }
+    }, 150);
+};
+
+// ==========================================
+// 5. EVENT BINDING & PASANG EVENT LISTENER FORM
+// ==========================================
+function setupEventListenersForm() {
+    const txSearchInput = document.querySelector('.search-item-group input');
+    const txSearchBtn = document.querySelector('.btn-search-item');
+    const txAddBtn = document.querySelector('.btn-add-list');
+    const txSaveBtn = document.querySelector('.btn-save-transaksi');
+
+    if (txSearchInput) {
+        txSearchInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                cariBarangTransaksi();
+            }
+        });
+    }
+    if (txSearchBtn) txSearchBtn.addEventListener('click', (e) => { e.preventDefault(); cariBarangTransaksi(); });
+    if (txAddBtn) txAddBtn.addEventListener('click', (e) => { e.preventDefault(); tambahKeKeranjang(); });
+    if (txSaveBtn) txSaveBtn.addEventListener('click', (e) => { e.preventDefault(); simpanSeluruhTransaksi(); });
+}
+
+// ==========================================
+// 6. LOGIKA DARK MODE & PROFIL UTILITY
+// ==========================================
+const themeToggleBtn = document.getElementById('theme-toggle');
+const body = document.body;
+const themeIcon = themeToggleBtn?.querySelector('i');
+
+if (localStorage.getItem('theme') === 'light' && themeIcon) {
+    body.classList.add('light-mode');
+    themeIcon.classList.replace('fa-moon', 'fa-sun');
+}
+
+themeToggleBtn?.addEventListener('click', () => {
+    body.classList.toggle('light-mode');
+    if (body.classList.contains('light-mode')) {
+        localStorage.setItem('theme', 'light');
+        themeIcon.classList.replace('fa-moon', 'fa-sun');
+    } else {
+        localStorage.setItem('theme', 'dark');
+        themeIcon.classList.replace('fa-sun', 'fa-moon');
+    }
+});
+
+const profileMenu = document.getElementById('profile-menu');
+const dropdownMenu = document.getElementById('dropdown-menu');
+const btnLogin = document.getElementById('btn-login');
+const btnLogout = document.getElementById('btn-logout');
+const userName = document.getElementById('user-name');
+const userRole = document.getElementById('user-role');
+
+profileMenu?.addEventListener('click', (e) => {
+    if (e.target.closest('.dropdown-menu') === null) {
+        dropdownMenu.classList.toggle('active');
+    }
+});
+
+document.addEventListener('click', (e) => {
+    if (profileMenu && !profileMenu.contains(e.target)) {
+        dropdownMenu.classList.remove('active');
+    }
+});
+
+btnLogin?.addEventListener('click', (e) => {
+    e.preventDefault();
+    userName.innerText = "Admin Inventory";
+    userRole.innerText = "Super Admin";
+    userRole.style.backgroundColor = "rgba(16, 185, 129, 0.2)"; 
+    userRole.style.color = "var(--color-green)";
+    btnLogin.style.display = "none";
+    btnLogout.style.display = "flex";
+    dropdownMenu.classList.remove('active');
+});
+
+btnLogout?.addEventListener('click', (e) => {
+    e.preventDefault();
+    userName.innerText = "Tamu";
+    userRole.innerText = "Belum Login";
+    userRole.style.backgroundColor = "var(--border-color)";
+    userRole.style.color = "var(--text-muted)";
+    btnLogin.style.display = "flex";
+    btnLogout.style.display = "none";
+    dropdownMenu.classList.remove('active');
+});
+
+// ==========================================
+// 7. SAKLAR PERPINDAHAN SECTIONS (NAVIGASI)
+// ==========================================
+function toggleFormTransaksi() {
+    const tipe = document.getElementById('tipe-transaksi').value;
+    const formIn = document.getElementById('form-in-fields');
+    const formOut = document.getElementById('form-out-fields');
+    if (formIn && formOut) {
+        formIn.style.display = (tipe === 'in') ? 'block' : 'none';
+        formOut.style.display = (tipe === 'out') ? 'block' : 'none';
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const menuDashboard = document.getElementById('menu-dashboard'); 
+    const menuInventori = document.getElementById('menu-inventori'); 
+    const menuTransaksi = document.getElementById('menu-transaksi'); 
+    
+    const sectionDashboard = document.getElementById('dashboard-section');
+    const sectionInventori = document.getElementById('inventori-section');
+    const sectionTransaksi = document.getElementById('transaksi-section'); 
+    const pageTitle = document.getElementById('page-title');
+
+    function switchPage(page) {
+        [menuDashboard, menuInventori, menuTransaksi].forEach(m => m?.classList.remove('active'));
+        [sectionDashboard, sectionInventori, sectionTransaksi].forEach(s => s?.classList.remove('active'));
+
+        if (page === 'dashboard') {
+            sectionDashboard?.classList.add('active');
+            menuDashboard?.classList.add('active');
+            if (pageTitle) pageTitle.innerText = "Dashboard";
+        } else if (page === 'inventori') {
+            sectionInventori?.classList.add('active');
+            menuInventori?.classList.add('active');
+            if (pageTitle) pageTitle.innerText = "Manajemen Inventori";
+            fetchInventoryData(); 
+        } else if (page === 'transaksi') {
+            sectionTransaksi?.classList.add('active');
+            menuTransaksi?.classList.add('active');
+            if (pageTitle) pageTitle.innerText = "Transaksi Barang";
+            
+            // Inisialisasi Elemen & Event Listener Keranjang saat Halaman Transaksi Dibuka
+            inisialisasiElemenKeranjang();
+            setupEventListenersForm();
+        }
+    }
+
+    if (menuDashboard) menuDashboard.addEventListener('click', (e) => { e.preventDefault(); switchPage('dashboard'); });
+    if (menuInventori) menuInventori.addEventListener('click', (e) => { e.preventDefault(); switchPage('inventori'); });
+    if (menuTransaksi) menuTransaksi.addEventListener('click', (e) => { e.preventDefault(); switchPage('transaksi'); });
+
+    // Pemuatan Awal Data Dashboard saat Aplikasi Dibuka
+    fetchDashboardData();
+    // Tarik database produk di latar belakang agar fitur pencarian form langsung siap pakai
+    fetch(API_URL).then(res => res.json()).then(data => { globalInventoryData = data.barang || []; }).catch(err => console.log(err));
+});
+
+// Penunjang Tombol Ekspor CSV
 const btnExport = document.getElementById('btnExport');
 if (btnExport) {
     btnExport.addEventListener('click', function(e) {
         e.preventDefault();
-        
-        if (globalInventoryData.length === 0) {
-            alert("Tidak ada data untuk diexport!");
-            return;
-        }
-
-        // Buat Header CSV
+        if (globalInventoryData.length === 0) { alert("Tidak ada data untuk diexport!"); return; }
         let csvContent = "SKU,Nama Barang,Kategori,Lokasi,Stok,Min Stok\n";
-        
-        // Isi Baris CSV
         globalInventoryData.forEach(item => {
-            // Tambahkan kutip ganda agar koma di dalam nama barang tidak merusak format CSV
             const nama = `"${item.nama || ''}"`; 
             csvContent += `${item.id},${nama},${item.kategori},${item.lokasi},${item.stok},${item.min}\n`;
         });
-
-        // Proses Download
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
         const link = document.createElement("a");
-        const url = URL.createObjectURL(blob);
-        
-        link.setAttribute("href", url);
+        link.setAttribute("href", URL.createObjectURL(blob));
         link.setAttribute("download", "Data_Inventori.csv");
-        link.style.visibility = 'hidden';
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
     });
 }
 
-// ==========================================
-// 6. FUNGSI TOMBOL AKSI (Edit & Transaksi)
-// ==========================================
 function editBarang(sku, nama) {
-    // Ini bisa dihubungkan ke Modal Pop-up atau halaman edit nantinya
-    alert(`Anda menekan tombol Edit untuk barang:\nNama: ${nama}\nSKU: ${sku}`);
+    alert(`Modul Edit Barang:\nNama: ${nama}\nSKU: ${sku}`);
 }
-
-function transaksiBarang(sku, nama) {
-    // Ini bisa dihubungkan ke Modal Transaksi Keluar/Masuk nantinya
-    alert(`Anda menekan tombol Transaksi untuk barang:\nNama: ${nama}\nSKU: ${sku}`);
-}
-
-// Fungsi untuk mengganti form IN dan OUT
-function toggleFormTransaksi() {
-    const tipe = document.getElementById('tipe-transaksi').value;
-    const formIn = document.getElementById('form-in-fields');
-    const formOut = document.getElementById('form-out-fields');
-
-    if (tipe === 'in') {
-        formIn.style.display = 'block';
-        formOut.style.display = 'none';
-    } else {
-        formIn.style.display = 'none';
-        formOut.style.display = 'block';
-    }
-}
-
-// Tambahkan logika perpindahan menu jika belum ada
-document.addEventListener('DOMContentLoaded', () => {
-    const menuDashboard = document.getElementById('menu-dashboard');
-    const menuInventori = document.getElementById('menu-inventori');
-    const menuTransaksi = document.getElementById('menu-transaksi'); // <-- Menu baru
-
-    const secDashboard = document.getElementById('dashboard-section');
-    const secInventori = document.getElementById('inventori-section');
-    const secTransaksi = document.getElementById('transaksi-section'); // <-- Section baru
-    const pageTitle = document.getElementById('page-title');
-
-    function switchPage(activeMenu, activeSection, title) {
-        // Hapus status active dari semua
-        [menuDashboard, menuInventori, menuTransaksi].forEach(m => m.classList.remove('active'));
-        [secDashboard, secInventori, secTransaksi].forEach(s => s.classList.remove('active'));
-        
-        // Tambahkan active ke yang diklik
-        activeMenu.classList.add('active');
-        activeSection.classList.add('active');
-        pageTitle.textContent = title;
-    }
-
-    if(menuDashboard) menuDashboard.addEventListener('click', () => switchPage(menuDashboard, secDashboard, 'Dashboard'));
-    if(menuInventori) menuInventori.addEventListener('click', () => switchPage(menuInventori, secInventori, 'Manajemen Inventori'));
-    if(menuTransaksi) menuTransaksi.addEventListener('click', () => switchPage(menuTransaksi, secTransaksi, 'Transaksi Barang'));
-});
