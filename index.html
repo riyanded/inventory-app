@@ -27,7 +27,12 @@
         <!-- Main Content -->
         <main class="main-content">
             <header>
-                <h1>Dashboard</h1>
+                <div class="header-left">
+                    <button id="sidebar-toggle" class="btn-toggle">
+                        <i class="fa-solid fa-bars"></i>
+                    </button>
+                    <h1>Dashboard</h1>
+                </div>
                 <div class="user-profile">
                     <div class="avatar"><i class="fa-solid fa-user"></i></div>
                 </div>
@@ -97,5 +102,12 @@
     </div>
 
     <script src="script.js"></script>
+    
+    <script>
+        document.getElementById('sidebar-toggle').addEventListener('click', function() {
+            document.querySelector('.sidebar').classList.toggle('active');
+        });
+    </script>
+</body>
 </body>
 </html>

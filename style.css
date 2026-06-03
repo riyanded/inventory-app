@@ -234,3 +234,89 @@ header {
 .btn-success { background-color: var(--accent-green); }
 .btn-purple { background-color: var(--accent-purple); }
 .btn-dark { background-color: var(--bg-hover); }
+
+/* ========================================================= */
+/* --- TAMBAHAN KODE UNTUK RESPONSIVE & MOBILE (HP) --- */
+/* ========================================================= */
+
+/* Styling untuk tombol hamburger (disembunyikan di laptop) */
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.btn-toggle {
+    display: none; /* Sembunyikan di desktop */
+    background: var(--bg-panel);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 18px;
+}
+
+/* Jika layar lebih kecil dari 768px (Layar HP/Tablet kecil) */
+@media screen and (max-width: 768px) {
+    
+    /* 1. Munculkan tombol hamburger */
+    .btn-toggle {
+        display: block;
+    }
+
+    /* 2. Sembunyikan Sidebar & buat melayang di atas konten */
+    .sidebar {
+        position: fixed;
+        left: -250px; /* Sembunyikan ke kiri layar */
+        top: 0;
+        height: 100vh;
+        z-index: 1000;
+        transition: left 0.3s ease; /* Animasi mulus saat muncul */
+        box-shadow: 5px 0 15px rgba(0,0,0,0.5);
+    }
+
+    /* Kelas active akan ditambahkan oleh JavaScript saat tombol diklik */
+    .sidebar.active {
+        left: 0; 
+    }
+
+    /* 3. Rapikan Padding Main Content */
+    .main-content {
+        padding: 15px;
+    }
+
+    /* 4. Ubah Grid Tabel & Aksi menjadi 1 kolom bertumpuk */
+    .content-grid {
+        grid-template-columns: 1fr; 
+    }
+
+    /* 5. Rapikan Tabel agar bisa di-scroll ke samping jika kepanjangan */
+    .table-container {
+        overflow-x: auto;
+    }
+
+    .data-table {
+        min-width: 500px; /* Paksa tabel agar tidak terlalu gepeng */
+    }
+
+    /* 6. Rapikan Header Table (Judul & Tombol Refresh) */
+    .table-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+}
+
+/* Jika layar sangat kecil (HP jadul) */
+@media screen and (max-width: 480px) {
+    .stat-card {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    .stat-icon {
+        align-self: flex-end;
+        margin-top: -30px;
+    }
+}
