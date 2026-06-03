@@ -108,6 +108,28 @@
             document.querySelector('.sidebar').classList.toggle('active');
         });
     </script>
-</body>
+<body>
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+    <div class="container">
+    <script src="script.js"></script>
+    
+    <script>
+        const sidebar = document.querySelector('.sidebar');
+        const sidebarToggle = document.getElementById('sidebar-toggle');
+        const overlay = document.getElementById('sidebar-overlay');
+
+        // Fungsi untuk membuka/menutup sidebar
+        function toggleSidebar() {
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+        }
+
+        // Event listener saat tombol hamburger diklik
+        sidebarToggle.addEventListener('click', toggleSidebar);
+
+        // Event listener saat area gelap (overlay) diklik
+        overlay.addEventListener('click', toggleSidebar);
+    </script>
 </body>
 </html>

@@ -258,49 +258,74 @@ header {
 }
 
 /* Jika layar lebih kecil dari 768px (Layar HP/Tablet kecil) */
+/* Jika layar lebih kecil dari 768px (Layar HP/Tablet kecil) */
 @media screen and (max-width: 768px) {
     
-    /* 1. Munculkan tombol hamburger */
+    /* Munculkan tombol hamburger */
     .btn-toggle {
         display: block;
+        position: relative;
+        z-index: 1005; /* Pastikan tombol selalu di atas */
     }
 
-    /* 2. Sembunyikan Sidebar & buat melayang di atas konten */
+    /* Lapisan gelap saat sidebar terbuka */
+    .sidebar-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 999;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .sidebar-overlay.active {
+        display: block;
+        opacity: 1;
+    }
+
+    /* Styling Sidebar untuk HP */
     .sidebar {
         position: fixed;
-        left: -250px; /* Sembunyikan ke kiri layar */
+        left: -250px; /* Sembunyikan di luar layar */
         top: 0;
         height: 100vh;
         z-index: 1000;
-        transition: left 0.3s ease; /* Animasi mulus saat muncul */
-        box-shadow: 5px 0 15px rgba(0,0,0,0.5);
+        transition: left 0.3s ease;
+        box-shadow: none; /* Hilangkan bayangan saat tertutup */
     }
 
-    /* Kelas active akan ditambahkan oleh JavaScript saat tombol diklik */
     .sidebar.active {
         left: 0; 
+        box-shadow: 5px 0 15px rgba(0,0,0,0.5); /* Munculkan bayangan */
     }
 
-    /* 3. Rapikan Padding Main Content */
+    /* Geser brand agar tidak tertutup tombol hamburger */
+    .brand {
+        padding-top: 20px; 
+        justify-content: center;
+    }
+
+    /* Penyesuaian layout utama */
     .main-content {
         padding: 15px;
     }
 
-    /* 4. Ubah Grid Tabel & Aksi menjadi 1 kolom bertumpuk */
     .content-grid {
         grid-template-columns: 1fr; 
     }
 
-    /* 5. Rapikan Tabel agar bisa di-scroll ke samping jika kepanjangan */
     .table-container {
         overflow-x: auto;
     }
 
     .data-table {
-        min-width: 500px; /* Paksa tabel agar tidak terlalu gepeng */
+        min-width: 500px; 
     }
 
-    /* 6. Rapikan Header Table (Judul & Tombol Refresh) */
     .table-header {
         flex-direction: column;
         align-items: flex-start;
