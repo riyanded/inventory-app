@@ -156,3 +156,72 @@ btnLogout.addEventListener('click', (e) => {
 // 5. INISIALISASI SAAT HALAMAN DIMUAT
 // ==========================================
 window.addEventListener('DOMContentLoaded', fetchDashboardData);
+
+// ==========================================
+// 6. LOGIKA NAVIGASI MENU (DASHBOARD & INVENTORI)
+// ==========================================
+document.addEventListener('DOMContentLoaded', () => {
+    const menuDashboard = document.getElementById('menu-dashboard'); // Pastikan ID ini ada di HTML menu Dashboard Anda
+    const menuInventori = document.getElementById('menu-inventori'); // Pastikan ID ini ada di HTML menu Inventori Anda
+    
+    const sectionDashboard = document.getElementById('dashboard-section');
+    const sectionInventori = document.getElementById('inventori-section');
+
+    function switchPage(page) {
+        if (page === 'dashboard') {
+            sectionDashboard.classList.add('active');
+            sectionInventori.classList.remove('active');
+            // Opsional: tambahkan class 'active' ke menu sidebar juga
+        } else if (page === 'inventori') {
+            sectionDashboard.classList.remove('active');
+            sectionInventori.classList.add('active');
+            renderDummyInventory(); // Panggil data saat masuk ke halaman ini
+        }
+    }
+
+    // Event listener untuk klik menu
+    if (menuDashboard) menuDashboard.addEventListener('click', (e) => { e.preventDefault(); switchPage('dashboard'); });
+    if (menuInventori) menuInventori.addEventListener('click', (e) => { e.preventDefault(); switchPage('inventori'); });
+});
+
+// ==========================================
+// RENDER DATA INVENTORI (Sementara pakai Data Dummy)
+// ==========================================
+function renderDummyInventory() {
+    const tbody = document.getElementById('tabel-inventori-body');
+    if (!tbody) return;
+
+    // Contoh data seperti di gambar Anda
+    const dummyData = [
+        { nama: 'Stub end agru 8"', sku: 'NWA0000001', kategori: 'Dn200mm', lokasi: 'STO-A1', stok: 0, min: 0 },
+        { nama: 'Stub end agru 6"', sku: 'NWA0000002', kategori: 'Dn160mm', lokasi: 'STO-A1', stok: 0, min: 0 },
+        { nama: 'Stub end agru 12"', sku: 'NWA0000003', kategori: 'Dn315mm', lokasi: 'STO-A1', stok: 0, min: 0 },
+        { nama: 'Stub end agru 2"', sku: 'NWA0000004', kategori: 'Dn63mm', lokasi: 'STO-A1', stok: 0, min: 0 }
+    ];
+
+    let rows = '';
+    dummyData.forEach(item => {
+        rows += `
+            <tr>
+                <td>
+                    <span class="item-title">${item.nama}</span>
+                    <span class="item-sku">${item.sku}</span>
+                </td>
+                <td>${item.kategori}</td>
+                <td>${item.lokasi}</td>
+                <td>
+                    <span class="stock-value">${item.stok}</span>
+                    <span class="stock-min">Min: ${item.min}</span>
+                    <div style="width: 100%; height: 4px; background: #eee; border-radius: 2px; margin-top: 5px;"></div>
+                </td>
+                <td><span class="badge-rendah">RENDAH</span></td>
+                <td class="action-btns">
+                    <i class="fa-solid fa-pen-to-square"></i>
+                    <i class="fa-solid fa-arrow-right-arrow-left"></i>
+                </td>
+            </tr>
+        `;
+    });
+
+    tbody.innerHTML = rows;
+}

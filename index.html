@@ -125,6 +125,49 @@
                     </div>
                 </div>
             </div>
+
+            <main class="main-content">
+    
+    <div id="dashboard-section" class="page-section active">
+        </div>
+
+    <div id="inventori-section" class="page-section" style="display: none;">
+        
+        <div class="inventori-header">
+            <div>
+                <h2>Manajemen Inventori</h2>
+                <p style="color: var(--text-muted); font-size: 14px; margin-top: 5px;">Kelola semua barang dalam sistem</p>
+            </div>
+            
+            <div class="inventori-actions">
+                <div class="search-box">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text" id="search-input" placeholder="Cari SKU atau nama...">
+                </div>
+                <button class="btn-export"><i class="fa-solid fa-file-export"></i> Export</button>
+                <button class="btn-sync"><i class="fa-solid fa-rotate"></i> Sync Stok</button>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>BARANG</th>
+                        <th>KATEGORI</th>
+                        <th>LOKASI</th>
+                        <th>STOK / MIN</th>
+                        <th>STATUS</th>
+                        <th>AKSI</th>
+                    </tr>
+                </thead>
+                <tbody id="tabel-inventori-body">
+                    </tbody>
+            </table>
+        </div>
+
+    </div>
+</main>
         </main>
     </div>
 
