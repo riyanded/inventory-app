@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventory Dashboard - Dark Blue</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Menggunakan Font Awesome untuk Ikon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="brand">
+                <i class="fa-solid fa-boxes-stacked"></i>
+                <h2>Inventory</h2>
+            </div>
+            <nav class="menu">
+                <a href="#" class="active"><i class="fa-solid fa-chart-pie"></i> Dashboard</a>
+                <a href="#"><i class="fa-solid fa-box"></i> Inventori</a>
+                <a href="#"><i class="fa-solid fa-exchange-alt"></i> Transaksi</a>
+                <a href="#"><i class="fa-solid fa-plus-circle"></i> Tambah Barang</a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header>
+                <h1>Dashboard</h1>
+                <div class="user-profile">
+                    <div class="avatar"><i class="fa-solid fa-user"></i></div>
+                </div>
+            </header>
+
+            <!-- Statistik Cards -->
+            <section class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-info">
+                        <h3>Total Barang</h3>
+                        <p id="total-barang">Memuat...</p>
+                    </div>
+                    <div class="stat-icon blue"><i class="fa-solid fa-box"></i></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-info">
+                        <h3>Stok Rendah</h3>
+                        <p id="stok-rendah">Memuat...</p>
+                    </div>
+                    <div class="stat-icon orange"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-info">
+                        <h3>Transaksi Hari Ini</h3>
+                        <p id="transaksi-hari-ini">Memuat...</p>
+                    </div>
+                    <div class="stat-icon green"><i class="fa-solid fa-file-invoice"></i></div>
+                </div>
+            </section>
+
+            <div class="content-grid">
+                <!-- Tabel Aktivitas Terbaru -->
+                <div class="table-container">
+                    <div class="table-header">
+                        <h2>Aktivitas Transaksi Terbaru</h2>
+                        <button class="btn-refresh" id="btn-refresh"><i class="fa-solid fa-sync"></i> Refresh</button>
+                    </div>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>TANGGAL & WAKTU</th>
+                                <th>BARANG</th>
+                                <th>TIPE</th>
+                                <th>QTY</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-body">
+                            <tr>
+                                <td colspan="4" class="text-center">Mengambil data dari server...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Aksi Cepat -->
+                <div class="action-container">
+                    <h2>Aksi Cepat</h2>
+                    <div class="action-buttons">
+                        <button class="btn btn-primary"><i class="fa-solid fa-plus"></i> Transaksi Baru</button>
+                        <button class="btn btn-success"><i class="fa-solid fa-barcode"></i> Tambah Barang</button>
+                        <button class="btn btn-purple"><i class="fa-solid fa-download"></i> Export Data</button>
+                        <button class="btn btn-dark"><i class="fa-solid fa-rotate"></i> Sync Stok</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
