@@ -482,11 +482,11 @@ body.light-mode {
     gap: 10px;
 }
 
-.search-box {
+.searchInput {
     position: relative;
 }
 
-.search-box i {
+.searchInput i {
     position: absolute;
     left: 12px;
     top: 50%;
@@ -494,7 +494,7 @@ body.light-mode {
     color: #888;
 }
 
-.search-box input {
+.searchInput {
     padding: 8px 15px 8px 35px;
     border: 1px solid #e0e0e0;
     border-radius: 6px;
@@ -503,7 +503,7 @@ body.light-mode {
     font-family: inherit;
 }
 
-.btn-export {
+.btnExport {
     background-color: #a55eea;
     color: white;
     border: none;
@@ -513,7 +513,7 @@ body.light-mode {
     font-weight: 500;
 }
 
-.btn-sync {
+.btnSync {
     background-color: #2f3640;
     color: white;
     border: none;
