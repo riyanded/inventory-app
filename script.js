@@ -22,22 +22,22 @@ async function fetchDashboardData() {
         const response = await fetch(API_URL);
         const data = await response.json();
 
-        // Jika berhasil mengambil data
-        if (data.status === "success" || data.totalBarang !== undefined) {
+        // Cek apakah data.total_barang ada di dalam JSON yang diterima
+        if (data.total_barang !== undefined) {
             
-            // A. Update 3 Kartu Angka Utama
-            document.getElementById('total-barang').innerText = data.totalBarang || 0;
-            document.getElementById('stok-rendah').innerText = data.stokRendah || 0;
-            document.getElementById('transaksi-hari-ini').innerText = data.transaksiHariIni || 0;
+            // A. Update 3 Kartu Angka Utama (Disesuaikan dengan format JSON dari backend Anda)
+            document.getElementById('total-barang').innerText = data.total_barang || 0;
+            document.getElementById('stok-rendah').innerText = data.stok_rendah || 0;
+            document.getElementById('transaksi-hari-ini').innerText = data.transaksi_hari_ini || 0;
 
-            // B. Update Tabel Aktivitas Transaksi Terbaru
-            if (tabelBody && data.transaksiTerbaru) {
+            // B. Update Tabel Aktivitas Transaksi Terbaru (Disesuaikan menjadi data.transaksi)
+            if (tabelBody && data.transaksi) {
                 tabelBody.innerHTML = ''; // Bersihkan tulisan "Memuat data..."
 
-                if (data.transaksiTerbaru.length === 0) {
+                if (data.transaksi.length === 0) {
                     tabelBody.innerHTML = `<tr><td colspan="4" style="text-align:center; color: var(--text-muted);">Belum ada aktivitas transaksi terbaru</td></tr>`;
                 } else {
-                    data.transaksiTerbaru.forEach(trx => {
+                    data.transaksi.forEach(trx => {
                         // Tentukan warna badge (Merah untuk KELUAR, Hijau untuk MASUK)
                         const isKeluar = trx.tipe.toUpperCase() === 'KELUAR';
                         const badgeClass = isKeluar ? 'badge-out' : 'badge-in';
