@@ -23,8 +23,8 @@
             <nav class="nav-menu">
                 <a href="#" class="nav-item active" id="menu-dashboard"><i class="fa-solid fa-chart-pie"></i> Dashboard</a>
                 <a href="#" class="nav-item" id="menu-inventori"><i class="fa-solid fa-box"></i> Inventori</a>
-                <a href="#" class="nav-item"><i class="fa-solid fa-right-left"></i> Transaksi</a>
-                <a href="#" class="nav-item"><i class="fa-solid fa-circle-plus"></i> Tambah Barang</a>
+                <a href="#" class="nav-item" id="menu-transaksi"><i class="fa-solid fa-right-left"></i> Transaksi</a>
+                <a href="#" class="nav-item" id="menu-tambah"><i class="fa-solid fa-circle-plus"></i> Tambah Barang</a>
             </nav>
         </aside>
 
@@ -129,7 +129,6 @@
             </div>
 
             <div id="inventori-section" class="page-section">
-                
                 <div class="action-bar-container">
                     <div class="search-wrapper">
                         <i class="fa-solid fa-magnifying-glass search-icon"></i>
@@ -162,7 +161,6 @@
                             </tbody>
                     </table>
                 </div>
-                
             </div>
 
             <div id="transaksi-section" class="page-section">
@@ -174,8 +172,7 @@
                 <div class="transaksi-grid">
                     <div class="transaksi-card scanner-card">
                         <h3><i class="fa-solid fa-qrcode"></i> Scanner Barcode</h3>
-                        <div class="scanner-display">
-                            </div>
+                        <div class="scanner-display"></div>
                         <button class="btn-scan-action"><i class="fa-solid fa-play"></i> Mulai Scan</button>
                     </div>
 
@@ -238,7 +235,7 @@
                             </div>
                         </div>
 
-                        <div class="form-group">
+                        <div class="form-group" style="margin-top: 16px;">
                             <label>Details / Keterangan</label>
                             <textarea placeholder="Catatan opsional..." class="form-control" rows="3"></textarea>
                         </div>
@@ -253,7 +250,56 @@
     <script src="script.js"></script>
     
     <script>
-        // FUNGSI UNTUK MENGATUR SIDEBAR DI LAYAR KECIL (MOBILE)
+        // 1. FUNGSI SWAP FORM IN / OUT
+        function toggleFormTransaksi() {
+            const tipe = document.getElementById('tipe-transaksi').value;
+            const formIn = document.getElementById('form-in-fields');
+            const formOut = document.getElementById('form-out-fields');
+
+            if (tipe === 'in') {
+                formIn.style.display = 'block';
+                formOut.style.display = 'none';
+            } else {
+                formIn.style.display = 'none';
+                formOut.style.display = 'block';
+            }
+        }
+
+        // 2. FUNGSI NAVIGASI PINDAH HALAMAN SIDEBAR
+        document.addEventListener('DOMContentLoaded', () => {
+            const menuDashboard = document.getElementById('menu-dashboard');
+            const menuInventori = document.getElementById('menu-inventori');
+            const menuTransaksi = document.getElementById('menu-transaksi');
+
+            const secDashboard = document.getElementById('dashboard-section');
+            const secInventori = document.getElementById('inventori-section');
+            const secTransaksi = document.getElementById('transaksi-section');
+            
+            const pageTitle = document.getElementById('page-title');
+
+            function switchPage(activeMenu, activeSection, title) {
+                // Sembunyikan semua section & hilangkan class active di menu
+                [menuDashboard, menuInventori, menuTransaksi].forEach(m => { if(m) m.classList.remove('active') });
+                [secDashboard, secInventori, secTransaksi].forEach(s => { if(s) s.classList.remove('active') });
+                
+                // Aktifkan yang dipilih
+                activeMenu.classList.add('active');
+                activeSection.classList.add('active');
+                pageTitle.textContent = title;
+            }
+
+            if(menuDashboard && secDashboard) {
+                menuDashboard.addEventListener('click', (e) => { e.preventDefault(); switchPage(menuDashboard, secDashboard, 'Dashboard'); });
+            }
+            if(menuInventori && secInventori) {
+                menuInventori.addEventListener('click', (e) => { e.preventDefault(); switchPage(menuInventori, secInventori, 'Manajemen Inventori'); });
+            }
+            if(menuTransaksi && secTransaksi) {
+                menuTransaksi.addEventListener('click', (e) => { e.preventDefault(); switchPage(menuTransaksi, secTransaksi, 'Transaksi Barang'); });
+            }
+        });
+
+        // 3. TOGGLE SIDEBAR MOBILE
         const sidebar = document.querySelector('.sidebar');
         const sidebarToggle = document.getElementById('sidebar-toggle');
         const overlay = document.getElementById('sidebar-overlay');
