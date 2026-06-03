@@ -216,40 +216,41 @@ async function fetchInventoryData() {
         const response = await fetch(API_URL);
         const rawData = await response.json();
         
-        // --- FITUR DEBUGGING ---
-        // Cek Console (tekan F12 di browser) untuk melihat bentuk asli datamu!
         console.log("Data asli dari server:", rawData); 
 
-        // Deteksi lokasi array data secara otomatis
+        // --- PENCARI ARRAY OTOMATIS ---
         let items = [];
         if (Array.isArray(rawData)) {
-            items = rawData; // Jika responsnya langsung berupa array
-        } else if (rawData.data) {
-            items = rawData.data; // Jika data ada di dalam properti "data"
-        } else if (rawData.inventori) {
-            items = rawData.inventori; 
-        } else if (rawData.items) {
-            items = rawData.items;
+            items = rawData; // Jika datanya langsung berupa array
+        } else if (typeof rawData === 'object' && rawData !== null) {
+            // Menggeledah isi object untuk mencari array secara otomatis
+            for (const key in rawData) {
+                if (Array.isArray(rawData[key])) {
+                    items = rawData[key];
+                    console.log(`💡 Array otomatis ditemukan di dalam kunci: "${key}"`);
+                    break; // Ambil array pertama yang ditemukan
+                }
+            }
         }
 
         if (items.length > 0) {
             let rows = '';
             
             items.forEach(item => {
-                // Antisipasi perbedaan huruf besar/kecil dari nama kolom Spreadsheet
-                const nama = item.nama || item.Nama || item.NAMA || item["Nama Barang"] || '-';
-                const sku = item.sku || item.SKU || item.id || '-';
+                // Antisipasi perbedaan nama kolom dengan mencari berbagai variasi yang umum
+                const nama = item.nama || item.Nama || item.NAMA || item["Nama Barang"] || item["NAMA BARANG"] || '-';
+                const sku = item.sku || item.SKU || item.id || item.ID || '-';
                 const kategori = item.kategori || item.Kategori || item.KATEGORI || '-';
                 const lokasi = item.lokasi || item.Lokasi || item.LOKASI || '-';
                 
-                // Pastikan angka terbaca sebagai angka
-                const stok = parseInt(item.stok || item.Stok || item.STOK || 0);
-                const min = parseInt(item.min || item.Min || item.MIN || 0);
+                // Pastikan dibaca sebagai angka (bisa dari kolom qty, QTY, stok, Stok, dll)
+                const stok = parseInt(item.stok || item.Stok || item.STOK || item.qty || item.QTY || item.Qty || 0);
+                const min = parseInt(item.min || item.Min || item.MIN || item.minimum || 0);
 
                 const isRendah = stok <= min;
                 const statusText = isRendah ? 'RENDAH' : 'AMAN';
                 
-                // Inline styling sementara untuk memastikan warna badge muncul
+                // Style untuk badge
                 const badgeStyle = isRendah 
                     ? "background: #ffeeba; color: #856404; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold;" 
                     : "background: #d4edda; color: #155724; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold;";
@@ -281,7 +282,8 @@ async function fetchInventoryData() {
             tbody.innerHTML = rows;
             
         } else {
-            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color: var(--text-muted);">Data berhasil ditarik, tapi array kosong atau format nama kolom tidak dikenali.</td></tr>`;
+            // Jika berhasil masuk ke sini tapi datanya benar-benar kosong di Spreadsheet
+            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color: var(--text-muted);">Data berhasil ditarik, tapi isi baris di Spreadsheet Anda masih kosong.</td></tr>`;
         }
     } catch (error) {
         console.error("Gagal mengambil data inventori:", error);
