@@ -357,3 +357,97 @@ header {
         min-width: 500px;
     }
 }
+
+/* =========================================
+   8. HEADER RIGHT & DROPDOWN PROFIL
+========================================= */
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.btn-icon {
+    background: transparent;
+    border: none;
+    color: var(--text-main);
+    font-size: 20px;
+    cursor: pointer;
+    transition: color 0.3s;
+}
+
+.user-profile {
+    position: relative;
+    cursor: pointer;
+}
+
+.dropdown-menu {
+    position: absolute;
+    right: 0;
+    top: 55px;
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    width: 220px;
+    box-shadow: 0 10px 15px -3px rgba(0,0,0,0.2);
+    display: none; /* Disembunyikan secara default */
+    flex-direction: column;
+    z-index: 2000;
+}
+
+.dropdown-menu.active {
+    display: flex;
+}
+
+.dropdown-header {
+    padding: 15px;
+}
+
+.dropdown-header p {
+    font-size: 16px;
+    font-weight: bold;
+    color: var(--text-main);
+    margin-bottom: 5px;
+}
+
+.dropdown-header .role {
+    font-size: 12px;
+    background-color: var(--border-color);
+    padding: 3px 8px;
+    border-radius: 4px;
+    color: var(--text-muted);
+}
+
+.dropdown-menu hr {
+    border: 0;
+    border-top: 1px solid var(--border-color);
+    margin: 0;
+}
+
+.dropdown-item {
+    padding: 12px 15px;
+    color: var(--text-main);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: background 0.2s;
+    font-size: 14px;
+}
+
+.dropdown-item:hover {
+    background-color: rgba(59, 130, 246, 0.1);
+    color: var(--color-blue);
+}
+
+/* =========================================
+   9. LIGHT MODE THEME
+========================================= */
+/* Ketika class .light-mode ditambahkan ke body, variabel warna akan berubah */
+body.light-mode {
+    --bg-main: #f8fafc;       /* Abu-abu sangat terang */
+    --bg-card: #ffffff;       /* Putih bersih */
+    --text-main: #0f172a;     /* Teks gelap/hitam */
+    --text-muted: #64748b;    /* Teks abu-abu */
+    --border-color: #e2e8f0;  /* Garis batas terang */
+}
