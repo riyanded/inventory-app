@@ -209,71 +209,101 @@ async function fetchInventoryData() {
     const tbody = document.getElementById('tabel-inventori-body');
     if (!tbody) return;
 
-    // Tampilkan tulisan loading
-    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color: var(--text-muted);">Memuat data dari Google Sheets...</td></tr>`;
+    // Tampilkan tulisan loading sementara
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color: var(--text-muted); padding: 20px;">Memuat data dari Google Sheets...</td></tr>`;
 
     try {
         const response = await fetch(API_URL);
         const rawData = await response.json();
         
-        console.log("Data asli dari server:", rawData); 
+        console.log("Data mentah dari Google Sheets:", rawData); 
 
-        // --- PENCARI ARRAY OTOMATIS ---
         let items = [];
+        
+        // 1. Jika datanya langsung berupa array utama
         if (Array.isArray(rawData)) {
-            items = rawData; // Jika datanya langsung berupa array
-        } else if (typeof rawData === 'object' && rawData !== null) {
-            // Menggeledah isi object untuk mencari array secara otomatis
-            for (const key in rawData) {
-                if (Array.isArray(rawData[key])) {
+            items = rawData;
+        } 
+        // 2. Jika berupa object, cari array yang TIDAK KOSONG terlebih dahulu
+        else if (typeof rawData === 'object' && rawData !== null) {
+            
+            // Cek berdasarkan kata kunci properti yang paling sering digunakan dan pastikan ada isinya
+            const priorityKeys = ['inventori', 'inventory', 'data', 'barang', 'items', 'records', 'result', 'sheet1'];
+            for (const key of priorityKeys) {
+                if (rawData[key] && Array.isArray(rawData[key]) && rawData[key].length > 0) {
                     items = rawData[key];
-                    console.log(`💡 Array otomatis ditemukan di dalam kunci: "${key}"`);
-                    break; // Ambil array pertama yang ditemukan
+                    break;
+                }
+            }
+
+            // Jika kata kunci di atas tidak ketemu, scan seluruh isi object untuk mencari array apa saja yang ada isinya
+            if (items.length === 0) {
+                for (const key in rawData) {
+                    if (Array.isArray(rawData[key]) && rawData[key].length > 0) {
+                        items = rawData[key];
+                        break;
+                    }
+                }
+            }
+
+            // Fallback terakhir: jika memang semua array kosong, baru ambil array pertama yang ditemui
+            if (items.length === 0) {
+                for (const key in rawData) {
+                    if (Array.isArray(rawData[key])) {
+                        items = rawData[key];
+                        break;
+                    }
                 }
             }
         }
 
+        // Jalankan render jika array data barang ditemukan
         if (items.length > 0) {
             let rows = '';
             
             items.forEach(item => {
-                // Antisipasi perbedaan nama kolom dengan mencari berbagai variasi yang umum
+                // Pemetaan nama kolom dengan toleransi huruf besar/kecil/spasi dari Spreadsheet
                 const nama = item.nama || item.Nama || item.NAMA || item["Nama Barang"] || item["NAMA BARANG"] || '-';
-                const sku = item.sku || item.SKU || item.id || item.ID || '-';
+                const sku = item.sku || item.SKU || item.id || item.ID || item["SKU Barang"] || '-';
                 const kategori = item.kategori || item.Kategori || item.KATEGORI || '-';
                 const lokasi = item.lokasi || item.Lokasi || item.LOKASI || '-';
                 
-                // Pastikan dibaca sebagai angka (bisa dari kolom qty, QTY, stok, Stok, dll)
-                const stok = parseInt(item.stok || item.Stok || item.STOK || item.qty || item.QTY || item.Qty || 0);
-                const min = parseInt(item.min || item.Min || item.MIN || item.minimum || 0);
+                // Deteksi Stok & Batas Minimum Stok
+                const stok = parseInt(item.stok || item.Stok || item.STOK || item.qty || item.QTY || 0);
+                const min = parseInt(item.min || item.Min || item.MIN || item.minimum || item["Min Stok"] || 0);
 
                 const isRendah = stok <= min;
                 const statusText = isRendah ? 'RENDAH' : 'AMAN';
                 
-                // Style untuk badge
+                // Pengaturan Gaya Tampilan Kustom sesuai UI Vercel Anda
                 const badgeStyle = isRendah 
-                    ? "background: #ffeeba; color: #856404; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold;" 
-                    : "background: #d4edda; color: #155724; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold;";
+                    ? "background: #fff0f0; color: #e63946; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: bold; display: inline-block;" 
+                    : "background: #f0fff4; color: #2bc47a; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: bold; display: inline-block;";
 
-                const stokColor = isRendah ? "color: red;" : "color: black;";
+                const stokColor = isRendah ? "color: #e63946; font-weight: bold;" : "color: #1e293b; font-weight: bold;";
+                const progressColor = isRendah ? "#e63946" : "#2bc47a";
 
                 rows += `
                     <tr>
                         <td>
-                            <span class="item-title" style="font-weight: bold; display: block;">${nama}</span>
-                            <span class="item-sku" style="color: gray; font-size: 12px;">${sku}</span>
+                            <span style="font-weight: 600; color: #1e293b; display: block; font-size: 14px;">${nama}</span>
+                            <span style="color: #94a3b8; font-size: 12px; display: block; margin-top: 2px;">${sku}</span>
                         </td>
-                        <td>${kategori}</td>
-                        <td>${lokasi}</td>
-                        <td>
-                            <span style="font-weight: bold; ${stokColor}">${stok}</span>
-                            <span style="color: gray; font-size: 12px; margin-left: 5px;">Min: ${min}</span>
-                            <div style="width: 100%; height: 4px; background: #eee; border-radius: 2px; margin-top: 5px;"></div>
+                        <td style="color: #475569; vertical-align: middle;">${kategori}</td>
+                        <td style="color: #475569; vertical-align: middle;">${lokasi}</td>
+                        <td style="vertical-align: middle;">
+                            <div style="display: flex; align-items: baseline; gap: 4px;">
+                                <span style="${stokColor}; font-size: 15px;">${stok}</span>
+                                <span style="color: #94a3b8; font-size: 12px;">/ Min: ${min}</span>
+                            </div>
+                            <div style="width: 100px; height: 5px; background: #f1f5f9; border-radius: 3px; margin-top: 6px; overflow: hidden;">
+                                <div style="width: ${stok > 0 ? '100%' : '0%'}; height: 100%; background: ${progressColor};"></div>
+                            </div>
                         </td>
-                        <td><span style="${badgeStyle}">${statusText}</span></td>
-                        <td class="action-btns">
-                            <i class="fa-solid fa-pen-to-square" style="cursor:pointer; color: #4361ee;"></i>
-                            <i class="fa-solid fa-arrow-right-arrow-left" style="cursor:pointer; color: #4361ee; margin-left:10px;"></i>
+                        <td style="vertical-align: middle;"><span style="${badgeStyle}">${statusText}</span></td>
+                        <td style="vertical-align: middle; font-size: 16px;">
+                            <a href="#" style="color: #4361ee; margin-right: 12px;" title="Edit"><i class="fa-solid fa-pen-to-square"></i></a>
+                            <a href="#" style="color: #4361ee;" title="Transaksi"><i class="fa-solid fa-right-left"></i></a>
                         </td>
                     </tr>
                 `;
@@ -282,11 +312,10 @@ async function fetchInventoryData() {
             tbody.innerHTML = rows;
             
         } else {
-            // Jika berhasil masuk ke sini tapi datanya benar-benar kosong di Spreadsheet
-            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color: var(--text-muted);">Data berhasil ditarik, tapi isi baris di Spreadsheet Anda masih kosong.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color: var(--text-muted); padding: 20px;">Data berhasil terhubung, tetapi sistem tidak menemukan baris tabel data yang valid di Spreadsheet Anda.</td></tr>`;
         }
     } catch (error) {
         console.error("Gagal mengambil data inventori:", error);
-        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color: red;">Gagal terhubung. Cek console (F12) untuk detail error.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color: red; padding: 20px;">Gagal terhubung ke database Spreadsheet. Periksa kembali URL Web App Apps Script Anda.</td></tr>`;
     }
 }
