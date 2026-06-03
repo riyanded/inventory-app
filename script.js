@@ -1,44 +1,81 @@
 // ==========================================
-// 1. KONFIGURASI API (URL GOOGLE APPS SCRIPT)
+// 1. KONFIGURASI API
 // ==========================================
-// PENTING: Ganti URL di bawah dengan URL Web App Google Apps Script Anda!
+// Jika Anda belum menggunakan Vercel Proxy (Langkah Keamanan), gunakan URL Apps Script langsung seperti ini:
 const API_URL = "https://script.google.com/macros/s/AKfycbw1PQint5ujLAONiovS7kTVvBzcK-tyukOYFvtkhzsGsSZ7zvseTORs8OIduC8CqgFS/exec";
 
 // ==========================================
 // 2. LOGIKA FETCH DATA (MENARIK DATA)
 // ==========================================
 async function fetchDashboardData() {
-    // Ubah angka menjadi '...' saat loading
+    // Tampilan indikator loading saat mengambil data
     document.getElementById('total-barang').innerText = '...';
     document.getElementById('stok-rendah').innerText = '...';
     document.getElementById('transaksi-hari-ini').innerText = '...';
+    
+    const tabelBody = document.getElementById('tabel-dashboard-transaksi');
+    if (tabelBody) {
+        tabelBody.innerHTML = `<tr><td colspan="4" style="text-align:center; color: var(--text-muted);">Memuat data dari server...</td></tr>`;
+    }
 
     try {
-        // Jika API_URL belum diisi, kita hentikan agar tidak error
-        if (API_URL === "https://script.google.com/macros/s/AKfycbw1PQint5ujLAONiovS7kTVvBzcK-tyukOYFvtkhzsGsSZ7zvseTORs8OIduC8CqgFS/exec") {
-            console.warn("⚠️ URL API belum diisi. Menampilkan data dummy.");
-            document.getElementById('total-barang').innerText = '45';
-            document.getElementById('stok-rendah').innerText = '3';
-            document.getElementById('transaksi-hari-ini').innerText = '12';
-            return;
-        }
-
         const response = await fetch(API_URL);
         const data = await response.json();
 
-        // Asumsi data JSON dari Apps Script Anda seperti: { totalBarang: 10, stokRendah: 2, transaksiHariIni: 5 }
-        document.getElementById('total-barang').innerText = data.totalBarang || 0;
-        document.getElementById('stok-rendah').innerText = data.stokRendah || 0;
-        document.getElementById('transaksi-hari-ini').innerText = data.transaksiHariIni || 0;
+        // Jika berhasil mengambil data
+        if (data.status === "success" || data.totalBarang !== undefined) {
+            
+            // A. Update 3 Kartu Angka Utama
+            document.getElementById('total-barang').innerText = data.totalBarang || 0;
+            document.getElementById('stok-rendah').innerText = data.stokRendah || 0;
+            document.getElementById('transaksi-hari-ini').innerText = data.transaksiHariIni || 0;
 
+            // B. Update Tabel Aktivitas Transaksi Terbaru
+            if (tabelBody && data.transaksiTerbaru) {
+                tabelBody.innerHTML = ''; // Bersihkan tulisan "Memuat data..."
+
+                if (data.transaksiTerbaru.length === 0) {
+                    tabelBody.innerHTML = `<tr><td colspan="4" style="text-align:center; color: var(--text-muted);">Belum ada aktivitas transaksi terbaru</td></tr>`;
+                } else {
+                    data.transaksiTerbaru.forEach(trx => {
+                        // Tentukan warna badge (Merah untuk KELUAR, Hijau untuk MASUK)
+                        const isKeluar = trx.tipe.toUpperCase() === 'KELUAR';
+                        const badgeClass = isKeluar ? 'badge-out' : 'badge-in';
+                        const qtyText = isKeluar ? `<span class="qty-out">-${trx.qty}</span>` : `<span class="qty-in" style="color: var(--color-green); font-weight: bold;">+${trx.qty}</span>`;
+
+                        const row = `
+                            <tr>
+                                <td>
+                                    <span class="date-row"><i class="fa-regular fa-calendar-days"></i> ${trx.tanggal.split(' ')[0]}</span>
+                                    <span class="time-row"><i class="fa-regular fa-clock"></i> ${trx.tanggal.split(' ')[1] || ''}</span>
+                                </td>
+                                <td><strong>${trx.barang}</strong></td>
+                                <td><span class="badge ${badgeClass}">${trx.tipe}</span></td>
+                                <td>${qtyText}</td>
+                            </tr>
+                        `;
+                        tabelBody.insertAdjacentHTML('beforeend', row);
+                    });
+                }
+            }
+        }
     } catch (error) {
-        console.error("Gagal mengambil data:", error);
+        console.error("Gagal mengambil data dari Google Sheets:", error);
         document.getElementById('total-barang').innerText = 'Err';
+        document.getElementById('stok-rendah').innerText = 'Err';
+        document.getElementById('transaksi-hari-ini').innerText = 'Err';
+        
+        if (tabelBody) {
+            tabelBody.innerHTML = `<tr><td colspan="4" style="text-align:center; color: var(--color-red);">Gagal terhubung ke database. Periksa URL Apps Script Anda.</td></tr>`;
+        }
     }
 }
 
-// Panggil fungsi refresh saat tombol Refresh ditekan
-document.getElementById('btn-refresh').addEventListener('click', fetchDashboardData);
+// Tombol Refresh untuk memanggil ulang data
+const btnRefresh = document.getElementById('btn-refresh');
+if (btnRefresh) {
+    btnRefresh.addEventListener('click', fetchDashboardData);
+}
 
 // ==========================================
 // 3. LOGIKA DARK / LIGHT MODE
@@ -47,7 +84,7 @@ const themeToggleBtn = document.getElementById('theme-toggle');
 const body = document.body;
 const themeIcon = themeToggleBtn.querySelector('i');
 
-// Cek memori browser, apakah user sebelumnya pakai light mode?
+// Cek preferensi tema sebelumnya di browser
 if (localStorage.getItem('theme') === 'light') {
     body.classList.add('light-mode');
     themeIcon.classList.replace('fa-moon', 'fa-sun');
@@ -66,7 +103,7 @@ themeToggleBtn.addEventListener('click', () => {
 });
 
 // ==========================================
-// 4. LOGIKA DROPDOWN PROFIL & MULTILEVEL LOGIN
+// 4. LOGIKA DROPDOWN PROFIL & LOGIN MULTILEVEL
 // ==========================================
 const profileMenu = document.getElementById('profile-menu');
 const dropdownMenu = document.getElementById('dropdown-menu');
@@ -77,24 +114,29 @@ const userRole = document.getElementById('user-role');
 
 // Buka/Tutup menu profil
 profileMenu.addEventListener('click', (e) => {
-    // Mencegah menu langsung tertutup saat item di dalamnya diklik
     if (e.target.closest('.dropdown-menu') === null) {
         dropdownMenu.classList.toggle('active');
     }
 });
 
-// Simulasi Login (Bisa Anda ubah nanti dengan sistem Auth sungguhan)
+// Tutup menu profil jika klik di luar area menu
+document.addEventListener('click', (e) => {
+    if (!profileMenu.contains(e.target)) {
+        dropdownMenu.classList.remove('active');
+    }
+});
+
+// Simulasi Login Admin
 btnLogin.addEventListener('click', (e) => {
     e.preventDefault();
-    userName.innerText = "Dani Sabri";
+    userName.innerText = "Admin Inventory";
     userRole.innerText = "Super Admin";
-    userRole.style.backgroundColor = "rgba(16, 185, 129, 0.2)"; // Warna hijau
+    userRole.style.backgroundColor = "rgba(16, 185, 129, 0.2)"; 
     userRole.style.color = "var(--color-green)";
     
     btnLogin.style.display = "none";
     btnLogout.style.display = "flex";
     dropdownMenu.classList.remove('active');
-    alert("Berhasil login sebagai Admin!");
 });
 
 // Simulasi Logout
@@ -110,5 +152,7 @@ btnLogout.addEventListener('click', (e) => {
     dropdownMenu.classList.remove('active');
 });
 
-// Jalankan pengambilan data pertama kali saat halaman dimuat
+// ==========================================
+// 5. INISIALISASI SAAT HALAMAN DIMUAT
+// ==========================================
 window.addEventListener('DOMContentLoaded', fetchDashboardData);
