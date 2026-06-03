@@ -203,91 +203,186 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ==========================================
-// 7. RENDER DATA INVENTORI & DASHBOARD DARI SPREADSHEET
+// VARIABEL GLOBAL (Brankas Data)
+// ==========================================
+let globalInventoryData = [];
+
+// ==========================================
+// 1. FUNGSI UTAMA: AMBIL DATA DARI SPREADSHEET
 // ==========================================
 async function fetchInventoryData() {
     const tbody = document.getElementById('tabel-inventori-body');
-    
-    // Element Dashboard (Sesuaikan id-nya jika berbeda di HTML Anda)
     const totalBarangEl = document.getElementById('total-barang-count'); 
     const stokRendahEl = document.getElementById('stok-rendah-count');
 
-    if (tbody) {
-        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color: var(--text-muted); padding: 20px;">Memuat data dari Google Sheets...</td></tr>`;
-    }
+    if (tbody) tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding: 20px;">Memuat data...</td></tr>`;
 
     try {
         const response = await fetch(API_URL);
         const rawData = await response.json();
         
-        console.log("Data terintegrasi sukses:", rawData); 
-
-        // 1. UPDATE ANGKA DI DASHBOARD SECARA DINAMIS
+        // Update Dashboard
         if (totalBarangEl) totalBarangEl.innerText = rawData.total_barang || 0;
         if (stokRendahEl) stokRendahEl.innerText = rawData.stok_rendah || 0;
 
-        // 2. RENDER TABEL BARANG
-        const items = rawData.barang || [];
+        // Simpan data barang ke Brankas Global
+        globalInventoryData = rawData.barang || [];
+        
+        // Tampilkan data
+        renderTable(globalInventoryData);
 
-        if (tbody) {
-            if (items.length > 0) {
-                let rows = '';
-                
-                items.forEach(item => {
-                    const nama = item.nama || '-';
-                    const sku = item.id || '-';
-                    const kategori = item.kategori || '-';
-                    const lokasi = item.lokasi || '-';
-                    const stok = parseInt(item.stok || 0);
-                    const min = parseInt(item.min || 0);
-
-                    const isRendah = stok <= min;
-                    const statusText = isRendah ? 'RENDAH' : 'AMAN';
-                    
-                    // Styling Badge Status & Progress Bar
-                    const badgeStyle = isRendah 
-                        ? "background: #fff0f0; color: #e63946; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: bold; display: inline-block;" 
-                        : "background: #f0fff4; color: #2bc47a; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: bold; display: inline-block;";
-
-                    const stokColor = isRendah ? "color: #e63946; font-weight: bold;" : "color: #1e293b; font-weight: bold;";
-                    const progressColor = isRendah ? "#e63946" : "#2bc47a";
-
-                    rows += `
-                        <tr>
-                            <td>
-                                <span style="font-weight: 600; color: #1e293b; display: block; font-size: 14px;">${nama}</span>
-                                <span style="color: #94a3b8; font-size: 12px; display: block; margin-top: 2px;">${sku}</span>
-                            </td>
-                            <td style="color: #475569; vertical-align: middle;">${kategori}</td>
-                            <td style="color: #475569; vertical-align: middle;">${lokasi}</td>
-                            <td style="vertical-align: middle;">
-                                <div style="display: flex; align-items: baseline; gap: 4px;">
-                                    <span style="${stokColor}; font-size: 15px;">${stok}</span>
-                                    <span style="color: #94a3b8; font-size: 12px;">/ Min: ${min}</span>
-                                </div>
-                                <div style="width: 100px; height: 5px; background: #f1f5f9; border-radius: 3px; margin-top: 6px; overflow: hidden;">
-                                    <div style="width: ${stok > 0 ? '100%' : '0%'}; height: 100%; background: ${progressColor};"></div>
-                                </div>
-                            </td>
-                            <td style="vertical-align: middle;"><span style="${badgeStyle}">${statusText}</span></td>
-                            <td style="vertical-align: middle; font-size: 16px;">
-                                <a href="#" style="color: #4361ee; margin-right: 12px;" title="Edit"><i class="fa-solid fa-pen-to-square"></i></a>
-                                <a href="#" style="color: #4361ee;" title="Transaksi"><i class="fa-solid fa-right-left"></i></a>
-                            </td>
-                        </tr>
-                    `;
-                });
-
-                tbody.innerHTML = rows;
-                
-            } else {
-                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color: var(--text-muted); padding: 20px;">Koneksi sukses, namun tidak ada baris data di tab 'Barang' Spreadsheet Anda.</td></tr>`;
-            }
-        }
     } catch (error) {
         console.error("Gagal sinkronisasi data:", error);
-        if (tbody) {
-            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color: red; padding: 20px;">Gagal memuat database. Pastikan Web App hasil Deploy Ulang sudah benar.</td></tr>`;
-        }
+        if (tbody) tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color: red; padding: 20px;">Gagal memuat database.</td></tr>`;
     }
+}
+
+// ==========================================
+// 2. FUNGSI RENDER TABEL (Tampilkan Data)
+// ==========================================
+function renderTable(items) {
+    const tbody = document.getElementById('tabel-inventori-body');
+    if (!tbody) return;
+
+    if (items.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color: #64748b; padding: 20px;">Data tidak ditemukan.</td></tr>`;
+        return;
+    }
+
+    let rows = '';
+    items.forEach(item => {
+        const nama = item.nama || '-';
+        const sku = item.id || '-';
+        const kategori = item.kategori || '-';
+        const lokasi = item.lokasi || '-';
+        const stok = parseInt(item.stok || 0);
+        const min = parseInt(item.min || 0);
+
+        const isRendah = stok <= min;
+        const statusText = isRendah ? 'RENDAH' : 'AMAN';
+        
+        const badgeStyle = isRendah 
+            ? "background: #fff0f0; color: #e63946; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: bold; display: inline-block;" 
+            : "background: #f0fff4; color: #2bc47a; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: bold; display: inline-block;";
+        const stokColor = isRendah ? "color: #e63946; font-weight: bold;" : "color: #1e293b; font-weight: bold;";
+        const progressColor = isRendah ? "#e63946" : "#2bc47a";
+
+        // Perhatikan bagian tombol Aksi di bawah, saya tambahkan event onclick()
+        rows += `
+            <tr>
+                <td>
+                    <span style="font-weight: 600; color: #1e293b; display: block; font-size: 14px;">${nama}</span>
+                    <span style="color: #94a3b8; font-size: 12px; display: block; margin-top: 2px;">${sku}</span>
+                </td>
+                <td style="color: #475569; vertical-align: middle;">${kategori}</td>
+                <td style="color: #475569; vertical-align: middle;">${lokasi}</td>
+                <td style="vertical-align: middle;">
+                    <div style="display: flex; align-items: baseline; gap: 4px;">
+                        <span style="${stokColor}; font-size: 15px;">${stok}</span>
+                        <span style="color: #94a3b8; font-size: 12px;">/ Min: ${min}</span>
+                    </div>
+                    <div style="width: 100px; height: 5px; background: #f1f5f9; border-radius: 3px; margin-top: 6px; overflow: hidden;">
+                        <div style="width: ${stok > 0 ? '100%' : '0%'}; height: 100%; background: ${progressColor};"></div>
+                    </div>
+                </td>
+                <td style="vertical-align: middle;"><span style="${badgeStyle}">${statusText}</span></td>
+                <td style="vertical-align: middle; font-size: 16px;">
+                    <a href="#" onclick="editBarang('${sku}', '${nama}')" style="color: #4361ee; margin-right: 12px;" title="Edit"><i class="fa-solid fa-pen-to-square"></i></a>
+                    <a href="#" onclick="transaksiBarang('${sku}', '${nama}')" style="color: #4361ee;" title="Transaksi"><i class="fa-solid fa-right-left"></i></a>
+                </td>
+            </tr>
+        `;
+    });
+
+    tbody.innerHTML = rows;
+}
+
+// ==========================================
+// 3. FITUR PENCARIAN (Search Bar)
+// ==========================================
+const searchInput = document.getElementById('searchInput');
+if (searchInput) {
+    searchInput.addEventListener('input', function(e) {
+        const keyword = e.target.value.toLowerCase();
+        
+        // Filter data di brankas berdasarkan nama atau SKU
+        const filteredData = globalInventoryData.filter(item => {
+            const nama = (item.nama || '').toLowerCase();
+            const sku = (item.id || '').toLowerCase();
+            return nama.includes(keyword) || sku.includes(keyword);
+        });
+        
+        // Tampilkan ulang tabel dengan data hasil filter
+        renderTable(filteredData);
+    });
+}
+
+// ==========================================
+// 4. FITUR SYNC STOK
+// ==========================================
+const btnSync = document.getElementById('btnSync');
+if (btnSync) {
+    btnSync.addEventListener('click', function(e) {
+        e.preventDefault(); // Mencegah halaman refresh
+        
+        // Efek visual tombol sedang loading (opsional)
+        const originalText = this.innerHTML;
+        this.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Syncing...';
+        
+        // Panggil ulang fungsi ambil data
+        fetchInventoryData().then(() => {
+            // Kembalikan teks tombol setelah selesai
+            setTimeout(() => { this.innerHTML = originalText; }, 500);
+        });
+    });
+}
+
+// ==========================================
+// 5. FITUR EXPORT KE CSV
+// ==========================================
+const btnExport = document.getElementById('btnExport');
+if (btnExport) {
+    btnExport.addEventListener('click', function(e) {
+        e.preventDefault();
+        
+        if (globalInventoryData.length === 0) {
+            alert("Tidak ada data untuk diexport!");
+            return;
+        }
+
+        // Buat Header CSV
+        let csvContent = "SKU,Nama Barang,Kategori,Lokasi,Stok,Min Stok\n";
+        
+        // Isi Baris CSV
+        globalInventoryData.forEach(item => {
+            // Tambahkan kutip ganda agar koma di dalam nama barang tidak merusak format CSV
+            const nama = `"${item.nama || ''}"`; 
+            csvContent += `${item.id},${nama},${item.kategori},${item.lokasi},${item.stok},${item.min}\n`;
+        });
+
+        // Proses Download
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement("a");
+        const url = URL.createObjectURL(blob);
+        
+        link.setAttribute("href", url);
+        link.setAttribute("download", "Data_Inventori.csv");
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    });
+}
+
+// ==========================================
+// 6. FUNGSI TOMBOL AKSI (Edit & Transaksi)
+// ==========================================
+function editBarang(sku, nama) {
+    // Ini bisa dihubungkan ke Modal Pop-up atau halaman edit nantinya
+    alert(`Anda menekan tombol Edit untuk barang:\nNama: ${nama}\nSKU: ${sku}`);
+}
+
+function transaksiBarang(sku, nama) {
+    // Ini bisa dihubungkan ke Modal Transaksi Keluar/Masuk nantinya
+    alert(`Anda menekan tombol Transaksi untuk barang:\nNama: ${nama}\nSKU: ${sku}`);
 }
