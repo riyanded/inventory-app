@@ -203,119 +203,48 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ==========================================
-// 7. RENDER DATA INVENTORI DARI SPREADSHEET
+// 7. RENDER DATA INVENTORI (VERSI DETEKTIF / DEBUG)
 // ==========================================
 async function fetchInventoryData() {
     const tbody = document.getElementById('tabel-inventori-body');
     if (!tbody) return;
 
-    // Tampilkan tulisan loading sementara
-    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color: var(--text-muted); padding: 20px;">Memuat data dari Google Sheets...</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding: 20px;">Menyelidiki data dari server...</td></tr>`;
 
     try {
         const response = await fetch(API_URL);
-        const rawData = await response.json();
         
-        console.log("Data mentah dari Google Sheets:", rawData); 
-
-        let items = [];
+        // Kita tangkap sebagai teks mentah dulu, jangan langsung di-JSON-kan
+        const rawText = await response.text();
         
-        // 1. Jika datanya langsung berupa array utama
-        if (Array.isArray(rawData)) {
-            items = rawData;
-        } 
-        // 2. Jika berupa object, cari array yang TIDAK KOSONG terlebih dahulu
-        else if (typeof rawData === 'object' && rawData !== null) {
-            
-            // Cek berdasarkan kata kunci properti yang paling sering digunakan dan pastikan ada isinya
-            const priorityKeys = ['inventori', 'inventory', 'data', 'barang', 'items', 'records', 'result', 'sheet1'];
-            for (const key of priorityKeys) {
-                if (rawData[key] && Array.isArray(rawData[key]) && rawData[key].length > 0) {
-                    items = rawData[key];
-                    break;
-                }
-            }
-
-            // Jika kata kunci di atas tidak ketemu, scan seluruh isi object untuk mencari array apa saja yang ada isinya
-            if (items.length === 0) {
-                for (const key in rawData) {
-                    if (Array.isArray(rawData[key]) && rawData[key].length > 0) {
-                        items = rawData[key];
-                        break;
-                    }
-                }
-            }
-
-            // Fallback terakhir: jika memang semua array kosong, baru ambil array pertama yang ditemui
-            if (items.length === 0) {
-                for (const key in rawData) {
-                    if (Array.isArray(rawData[key])) {
-                        items = rawData[key];
-                        break;
-                    }
-                }
-            }
+        let rawData;
+        try {
+            // Coba ubah teks tersebut menjadi JSON
+            rawData = JSON.parse(rawText);
+        } catch (parseError) {
+            // JIKA GAGAL: Berarti server tidak mengirim JSON (mungkin ngirim halaman Login HTML atau Error Google)
+            tbody.innerHTML = `
+                <tr><td colspan="6" style="text-align:left; background: #fff0f0; padding: 20px;">
+                    <b style="color: red;">Peringatan: Google Apps Script tidak mengirimkan data JSON yang valid!</b><br>
+                    Kemungkinan URL Web App salah, belum di-deploy sebagai "Anyone" (Siapa saja), atau scriptnya error.<br><br>
+                    <b>Balasan asli dari server:</b><br>
+                    <div style="background: #fff; padding: 10px; border: 1px solid #ddd; max-height: 200px; overflow-y: auto; font-family: monospace; font-size: 12px; margin-top: 10px;">
+                        ${rawText.replace(/</g, "&lt;").replace(/>/g, "&gt;")}
+                    </div>
+                </td></tr>`;
+            return;
         }
 
-        // Jalankan render jika array data barang ditemukan
-        if (items.length > 0) {
-            let rows = '';
-            
-            items.forEach(item => {
-                // Pemetaan nama kolom dengan toleransi huruf besar/kecil/spasi dari Spreadsheet
-                const nama = item.nama || item.Nama || item.NAMA || item["Nama Barang"] || item["NAMA BARANG"] || '-';
-                const sku = item.sku || item.SKU || item.id || item.ID || item["SKU Barang"] || '-';
-                const kategori = item.kategori || item.Kategori || item.KATEGORI || '-';
-                const lokasi = item.lokasi || item.Lokasi || item.LOKASI || '-';
-                
-                // Deteksi Stok & Batas Minimum Stok
-                const stok = parseInt(item.stok || item.Stok || item.STOK || item.qty || item.QTY || 0);
-                const min = parseInt(item.min || item.Min || item.MIN || item.minimum || item["Min Stok"] || 0);
+        // JIKA BERHASIL JADI JSON: Tampilkan wujud aslinya ke layar
+        tbody.innerHTML = `
+            <tr><td colspan="6" style="text-align:left; background: #f0f8ff; padding: 20px;">
+                <b style="color: #0056b3;">Data JSON berhasil ditangkap!</b><br>
+                Ternyata struktur data Anda seperti ini. Tolong <b>screenshot bagian kotak putih di bawah ini</b> dan kirimkan ke saya agar saya bisa menyesuaikan tabelnya:<br><br>
+                <div style="background: #fff; padding: 10px; border: 1px solid #ddd; max-height: 300px; overflow-y: auto; font-family: monospace; font-size: 12px; white-space: pre-wrap;">${JSON.stringify(rawData, null, 2)}</div>
+            </td></tr>`;
 
-                const isRendah = stok <= min;
-                const statusText = isRendah ? 'RENDAH' : 'AMAN';
-                
-                // Pengaturan Gaya Tampilan Kustom sesuai UI Vercel Anda
-                const badgeStyle = isRendah 
-                    ? "background: #fff0f0; color: #e63946; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: bold; display: inline-block;" 
-                    : "background: #f0fff4; color: #2bc47a; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: bold; display: inline-block;";
-
-                const stokColor = isRendah ? "color: #e63946; font-weight: bold;" : "color: #1e293b; font-weight: bold;";
-                const progressColor = isRendah ? "#e63946" : "#2bc47a";
-
-                rows += `
-                    <tr>
-                        <td>
-                            <span style="font-weight: 600; color: #1e293b; display: block; font-size: 14px;">${nama}</span>
-                            <span style="color: #94a3b8; font-size: 12px; display: block; margin-top: 2px;">${sku}</span>
-                        </td>
-                        <td style="color: #475569; vertical-align: middle;">${kategori}</td>
-                        <td style="color: #475569; vertical-align: middle;">${lokasi}</td>
-                        <td style="vertical-align: middle;">
-                            <div style="display: flex; align-items: baseline; gap: 4px;">
-                                <span style="${stokColor}; font-size: 15px;">${stok}</span>
-                                <span style="color: #94a3b8; font-size: 12px;">/ Min: ${min}</span>
-                            </div>
-                            <div style="width: 100px; height: 5px; background: #f1f5f9; border-radius: 3px; margin-top: 6px; overflow: hidden;">
-                                <div style="width: ${stok > 0 ? '100%' : '0%'}; height: 100%; background: ${progressColor};"></div>
-                            </div>
-                        </td>
-                        <td style="vertical-align: middle;"><span style="${badgeStyle}">${statusText}</span></td>
-                        <td style="vertical-align: middle; font-size: 16px;">
-                            <a href="#" style="color: #4361ee; margin-right: 12px;" title="Edit"><i class="fa-solid fa-pen-to-square"></i></a>
-                            <a href="#" style="color: #4361ee;" title="Transaksi"><i class="fa-solid fa-right-left"></i></a>
-                        </td>
-                    </tr>
-                `;
-            });
-
-            tbody.innerHTML = rows;
-            
-        } else {
-            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color: var(--text-muted); padding: 20px;">Data berhasil terhubung, tetapi sistem tidak menemukan baris tabel data yang valid di Spreadsheet Anda.</td></tr>`;
-        }
     } catch (error) {
-        console.error("Gagal mengambil data inventori:", error);
-        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color: red; padding: 20px;">Gagal terhubung ke database Spreadsheet. Periksa kembali URL Web App Apps Script Anda.</td></tr>`;
+        // Gagal melakukan fetch sama sekali (Misal: masalah CORS)
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color: red; padding: 20px;">Error Fetch API: ${error.message}</td></tr>`;
     }
 }
