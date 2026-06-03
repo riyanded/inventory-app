@@ -209,55 +209,82 @@ async function fetchInventoryData() {
     const tbody = document.getElementById('tabel-inventori-body');
     if (!tbody) return;
 
-    // Tampilkan tulisan loading sebelum data selesai diambil
-    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color: var(--text-muted);">Memuat data inventori dari server...</td></tr>`;
+    // Tampilkan tulisan loading
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color: var(--text-muted);">Memuat data dari Google Sheets...</td></tr>`;
 
     try {
-        // Menggunakan API_URL yang sama dengan yang ada di paling atas script.js kamu
         const response = await fetch(API_URL);
-        const data = await response.json();
+        const rawData = await response.json();
+        
+        // --- FITUR DEBUGGING ---
+        // Cek Console (tekan F12 di browser) untuk melihat bentuk asli datamu!
+        console.log("Data asli dari server:", rawData); 
 
-        // Asumsi: JSON dari Apps Script kamu memiliki array bernama "inventori"
-        // Jika nama array-nya berbeda (misal: "data_barang"), silakan ubah kata "inventori" di bawah ini
-        if (data.inventori && data.inventori.length > 0) {
+        // Deteksi lokasi array data secara otomatis
+        let items = [];
+        if (Array.isArray(rawData)) {
+            items = rawData; // Jika responsnya langsung berupa array
+        } else if (rawData.data) {
+            items = rawData.data; // Jika data ada di dalam properti "data"
+        } else if (rawData.inventori) {
+            items = rawData.inventori; 
+        } else if (rawData.items) {
+            items = rawData.items;
+        }
+
+        if (items.length > 0) {
             let rows = '';
             
-            data.inventori.forEach(item => {
-                // Tentukan warna badge berdasarkan stok (Jika stok <= min, maka RENDAH)
-                const isRendah = item.stok <= item.min;
-                const badgeClass = isRendah ? 'badge-rendah' : 'badge-aman'; // Pastikan ada CSS untuk badge-aman jika ingin warna hijau
+            items.forEach(item => {
+                // Antisipasi perbedaan huruf besar/kecil dari nama kolom Spreadsheet
+                const nama = item.nama || item.Nama || item.NAMA || item["Nama Barang"] || '-';
+                const sku = item.sku || item.SKU || item.id || '-';
+                const kategori = item.kategori || item.Kategori || item.KATEGORI || '-';
+                const lokasi = item.lokasi || item.Lokasi || item.LOKASI || '-';
+                
+                // Pastikan angka terbaca sebagai angka
+                const stok = parseInt(item.stok || item.Stok || item.STOK || 0);
+                const min = parseInt(item.min || item.Min || item.MIN || 0);
+
+                const isRendah = stok <= min;
                 const statusText = isRendah ? 'RENDAH' : 'AMAN';
+                
+                // Inline styling sementara untuk memastikan warna badge muncul
+                const badgeStyle = isRendah 
+                    ? "background: #ffeeba; color: #856404; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold;" 
+                    : "background: #d4edda; color: #155724; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold;";
+
+                const stokColor = isRendah ? "color: red;" : "color: black;";
 
                 rows += `
                     <tr>
                         <td>
-                            <span class="item-title">${item.nama || '-'}</span>
-                            <span class="item-sku">${item.sku || '-'}</span>
+                            <span class="item-title" style="font-weight: bold; display: block;">${nama}</span>
+                            <span class="item-sku" style="color: gray; font-size: 12px;">${sku}</span>
                         </td>
-                        <td>${item.kategori || '-'}</td>
-                        <td>${item.lokasi || '-'}</td>
+                        <td>${kategori}</td>
+                        <td>${lokasi}</td>
                         <td>
-                            <span class="stock-value">${item.stok || 0}</span>
-                            <span class="stock-min">Min: ${item.min || 0}</span>
+                            <span style="font-weight: bold; ${stokColor}">${stok}</span>
+                            <span style="color: gray; font-size: 12px; margin-left: 5px;">Min: ${min}</span>
                             <div style="width: 100%; height: 4px; background: #eee; border-radius: 2px; margin-top: 5px;"></div>
                         </td>
-                        <td><span class="badge ${badgeClass}">${statusText}</span></td>
+                        <td><span style="${badgeStyle}">${statusText}</span></td>
                         <td class="action-btns">
-                            <i class="fa-solid fa-pen-to-square" style="cursor:pointer; color:var(--color-blue);"></i>
-                            <i class="fa-solid fa-arrow-right-arrow-left" style="cursor:pointer; color:var(--color-blue); margin-left:10px;"></i>
+                            <i class="fa-solid fa-pen-to-square" style="cursor:pointer; color: #4361ee;"></i>
+                            <i class="fa-solid fa-arrow-right-arrow-left" style="cursor:pointer; color: #4361ee; margin-left:10px;"></i>
                         </td>
                     </tr>
                 `;
             });
 
-            // Masukkan baris data ke dalam tabel
             tbody.innerHTML = rows;
             
         } else {
-            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color: var(--text-muted);">Belum ada data barang di Inventori.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color: var(--text-muted);">Data berhasil ditarik, tapi array kosong atau format nama kolom tidak dikenali.</td></tr>`;
         }
     } catch (error) {
         console.error("Gagal mengambil data inventori:", error);
-        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color: var(--color-red);">Gagal terhubung ke database. Periksa API Apps Script.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color: red;">Gagal terhubung. Cek console (F12) untuk detail error.</td></tr>`;
     }
 }
