@@ -161,67 +161,103 @@ window.addEventListener('DOMContentLoaded', fetchDashboardData);
 // 6. LOGIKA NAVIGASI MENU (DASHBOARD & INVENTORI)
 // ==========================================
 document.addEventListener('DOMContentLoaded', () => {
-    const menuDashboard = document.getElementById('menu-dashboard'); // Pastikan ID ini ada di HTML menu Dashboard Anda
-    const menuInventori = document.getElementById('menu-inventori'); // Pastikan ID ini ada di HTML menu Inventori Anda
+    const menuDashboard = document.getElementById('menu-dashboard'); 
+    const menuInventori = document.getElementById('menu-inventori'); 
     
     const sectionDashboard = document.getElementById('dashboard-section');
     const sectionInventori = document.getElementById('inventori-section');
+    const pageTitle = document.getElementById('page-title'); // Mengambil elemen judul header
 
     function switchPage(page) {
+        // A. Reset semua status menu menjadi tidak aktif
+        if (menuDashboard) menuDashboard.classList.remove('active');
+        if (menuInventori) menuInventori.classList.remove('active');
+
+        // B. Logika perpindahan halaman
         if (page === 'dashboard') {
+            // Tampilkan section dashboard
             sectionDashboard.classList.add('active');
             sectionInventori.classList.remove('active');
-            // Opsional: tambahkan class 'active' ke menu sidebar juga
+            
+            // Nyalakan menu dashboard dan ubah judul header
+            if (menuDashboard) menuDashboard.classList.add('active');
+            if (pageTitle) pageTitle.innerText = "Dashboard"; 
+            
         } else if (page === 'inventori') {
+            // Tampilkan section inventori
             sectionDashboard.classList.remove('active');
             sectionInventori.classList.add('active');
-            renderDummyInventory(); // Panggil data saat masuk ke halaman ini
+            
+            // Nyalakan menu inventori dan ubah judul header
+            if (menuInventori) menuInventori.classList.add('active');
+            if (pageTitle) pageTitle.innerText = "Manajemen Inventori"; 
+            
+            // Panggil fungsi untuk mengambil data asli dari Spreadsheet
+            fetchInventoryData(); 
         }
     }
 
-    // Event listener untuk klik menu
+    // Pasang aksi klik pada menu
     if (menuDashboard) menuDashboard.addEventListener('click', (e) => { e.preventDefault(); switchPage('dashboard'); });
     if (menuInventori) menuInventori.addEventListener('click', (e) => { e.preventDefault(); switchPage('inventori'); });
 });
 
 // ==========================================
-// RENDER DATA INVENTORI (Sementara pakai Data Dummy)
+// 7. RENDER DATA INVENTORI DARI SPREADSHEET
 // ==========================================
-function renderDummyInventory() {
+async function fetchInventoryData() {
     const tbody = document.getElementById('tabel-inventori-body');
     if (!tbody) return;
 
-    // Contoh data seperti di gambar Anda
-    const dummyData = [
-        { nama: 'Stub end agru 8"', sku: 'NWA0000001', kategori: 'Dn200mm', lokasi: 'STO-A1', stok: 0, min: 0 },
-        { nama: 'Stub end agru 6"', sku: 'NWA0000002', kategori: 'Dn160mm', lokasi: 'STO-A1', stok: 0, min: 0 },
-        { nama: 'Stub end agru 12"', sku: 'NWA0000003', kategori: 'Dn315mm', lokasi: 'STO-A1', stok: 0, min: 0 },
-        { nama: 'Stub end agru 2"', sku: 'NWA0000004', kategori: 'Dn63mm', lokasi: 'STO-A1', stok: 0, min: 0 }
-    ];
+    // Tampilkan tulisan loading sebelum data selesai diambil
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color: var(--text-muted);">Memuat data inventori dari server...</td></tr>`;
 
-    let rows = '';
-    dummyData.forEach(item => {
-        rows += `
-            <tr>
-                <td>
-                    <span class="item-title">${item.nama}</span>
-                    <span class="item-sku">${item.sku}</span>
-                </td>
-                <td>${item.kategori}</td>
-                <td>${item.lokasi}</td>
-                <td>
-                    <span class="stock-value">${item.stok}</span>
-                    <span class="stock-min">Min: ${item.min}</span>
-                    <div style="width: 100%; height: 4px; background: #eee; border-radius: 2px; margin-top: 5px;"></div>
-                </td>
-                <td><span class="badge-rendah">RENDAH</span></td>
-                <td class="action-btns">
-                    <i class="fa-solid fa-pen-to-square"></i>
-                    <i class="fa-solid fa-arrow-right-arrow-left"></i>
-                </td>
-            </tr>
-        `;
-    });
+    try {
+        // Menggunakan API_URL yang sama dengan yang ada di paling atas script.js kamu
+        const response = await fetch(API_URL);
+        const data = await response.json();
 
-    tbody.innerHTML = rows;
+        // Asumsi: JSON dari Apps Script kamu memiliki array bernama "inventori"
+        // Jika nama array-nya berbeda (misal: "data_barang"), silakan ubah kata "inventori" di bawah ini
+        if (data.inventori && data.inventori.length > 0) {
+            let rows = '';
+            
+            data.inventori.forEach(item => {
+                // Tentukan warna badge berdasarkan stok (Jika stok <= min, maka RENDAH)
+                const isRendah = item.stok <= item.min;
+                const badgeClass = isRendah ? 'badge-rendah' : 'badge-aman'; // Pastikan ada CSS untuk badge-aman jika ingin warna hijau
+                const statusText = isRendah ? 'RENDAH' : 'AMAN';
+
+                rows += `
+                    <tr>
+                        <td>
+                            <span class="item-title">${item.nama || '-'}</span>
+                            <span class="item-sku">${item.sku || '-'}</span>
+                        </td>
+                        <td>${item.kategori || '-'}</td>
+                        <td>${item.lokasi || '-'}</td>
+                        <td>
+                            <span class="stock-value">${item.stok || 0}</span>
+                            <span class="stock-min">Min: ${item.min || 0}</span>
+                            <div style="width: 100%; height: 4px; background: #eee; border-radius: 2px; margin-top: 5px;"></div>
+                        </td>
+                        <td><span class="badge ${badgeClass}">${statusText}</span></td>
+                        <td class="action-btns">
+                            <i class="fa-solid fa-pen-to-square" style="cursor:pointer; color:var(--color-blue);"></i>
+                            <i class="fa-solid fa-arrow-right-arrow-left" style="cursor:pointer; color:var(--color-blue); margin-left:10px;"></i>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            // Masukkan baris data ke dalam tabel
+            tbody.innerHTML = rows;
+            
+        } else {
+            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color: var(--text-muted);">Belum ada data barang di Inventori.</td></tr>`;
+        }
+    } catch (error) {
+        console.error("Gagal mengambil data inventori:", error);
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color: var(--color-red);">Gagal terhubung ke database. Periksa API Apps Script.</td></tr>`;
+    }
 }
