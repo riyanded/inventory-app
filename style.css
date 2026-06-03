@@ -258,17 +258,25 @@ header {
 }
 
 /* Jika layar lebih kecil dari 768px (Layar HP/Tablet kecil) */
-/* Jika layar lebih kecil dari 768px (Layar HP/Tablet kecil) */
+/* ================================================================== */
+/* KODE DESKTOP/LAPTOP ANDA YANG LAMA BIARKAN DI ATAS (JANGAN DIUBAH) */
+/* ================================================================== */
+
+
+/* ================================================================== */
+/* --- KODE KHUSUS HP (PASTIKAN TERBUNGKUS DI DALAM @MEDIA) ---       */
+/* ================================================================== */
+
 @media screen and (max-width: 768px) {
     
-    /* Munculkan tombol hamburger */
+    /* 1. Tombol hamburger hanya muncul di HP */
     .btn-toggle {
         display: block;
         position: relative;
-        z-index: 1005; /* Pastikan tombol selalu di atas */
+        z-index: 1005; 
     }
 
-    /* Lapisan gelap saat sidebar terbuka */
+    /* 2. Overlay gelap saat menu HP terbuka */
     .sidebar-overlay {
         display: none;
         position: fixed;
@@ -287,35 +295,39 @@ header {
         opacity: 1;
     }
 
-    /* Styling Sidebar untuk HP */
+    /* 3. Sembunyikan sidebar ke kiri jika di HP */
     .sidebar {
         position: fixed;
-        left: -250px; /* Sembunyikan di luar layar */
+        left: -250px; 
         top: 0;
         height: 100vh;
         z-index: 1000;
         transition: left 0.3s ease;
-        box-shadow: none; /* Hilangkan bayangan saat tertutup */
+        box-shadow: none; 
     }
 
     .sidebar.active {
         left: 0; 
-        box-shadow: 5px 0 15px rgba(0,0,0,0.5); /* Munculkan bayangan */
+        box-shadow: 5px 0 15px rgba(0,0,0,0.5); 
     }
 
-    /* Geser brand agar tidak tertutup tombol hamburger */
     .brand {
         padding-top: 20px; 
         justify-content: center;
     }
 
-    /* Penyesuaian layout utama */
     .main-content {
         padding: 15px;
     }
 
+    /* 4. HANYA DI HP: Mengubah grid menjadi 1 kolom bertumpuk */
     .content-grid {
-        grid-template-columns: 1fr; 
+        grid-template-columns: 1fr !important; 
+    }
+
+    /* HANYA DI HP: Mengubah kartu statistik menjadi bertumpuk */
+    .overview-grid, .stats-container {
+        grid-template-columns: 1fr !important;
     }
 
     .table-container {
@@ -331,7 +343,8 @@ header {
         align-items: flex-start;
         gap: 10px;
     }
-}
+
+} /* <--- WAJIB ADA! Ini kurung penutup untuk mengunci kode HP agar tidak bocor ke laptop */
 
 /* Jika layar sangat kecil (HP jadul) */
 @media screen and (max-width: 480px) {

@@ -3,28 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inventory Dashboard - Dark Blue</title>
-    <link rel="stylesheet" href="style.css">
-    <!-- Menggunakan Font Awesome untuk Ikon -->
+    <title>Inventory Management Dashboard</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
+
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
     <div class="container">
-        <!-- Sidebar Navigation -->
         <aside class="sidebar">
             <div class="brand">
-                <i class="fa-solid fa-boxes-stacked"></i>
-                <h2>Inventory</h2>
+                <i class="fa-solid fa-boxes-stacked brand-icon"></i>
+                <div>
+                    <h2>Inventory</h2>
+                    <p>Management v1.0</p>
+                </div>
             </div>
-            <nav class="menu">
-                <a href="#" class="active"><i class="fa-solid fa-chart-pie"></i> Dashboard</a>
-                <a href="#"><i class="fa-solid fa-box"></i> Inventori</a>
-                <a href="#"><i class="fa-solid fa-exchange-alt"></i> Transaksi</a>
-                <a href="#"><i class="fa-solid fa-plus-circle"></i> Tambah Barang</a>
+            <nav class="nav-menu">
+                <a href="#" class="nav-item active"><i class="fa-solid fa-chart-pie"></i> Dashboard</a>
+                <a href="#" class="nav-item"><i class="fa-solid fa-box"></i> Inventori</a>
+                <a href="#" class="nav-item"><i class="fa-solid fa-right-left"></i> Transaksi</a>
+                <a href="#" class="nav-item"><i class="fa-solid fa-circle-plus"></i> Tambah Barang</a>
             </nav>
         </aside>
 
-        <!-- Main Content -->
         <main class="main-content">
             <header>
                 <div class="header-left">
@@ -38,63 +41,70 @@
                 </div>
             </header>
 
-            <!-- Statistik Cards -->
-            <section class="stats-grid">
+            <div class="overview-grid">
                 <div class="stat-card">
                     <div class="stat-info">
-                        <h3>Total Barang</h3>
-                        <p id="total-barang">Memuat...</p>
+                        <p>Total Barang</p>
+                        <h3 id="total-barang">2</h3>
                     </div>
-                    <div class="stat-icon blue"><i class="fa-solid fa-box"></i></div>
+                    <div class="stat-icon icon-blue"><i class="fa-solid fa-box"></i></div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-info">
-                        <h3>Stok Rendah</h3>
-                        <p id="stok-rendah">Memuat...</p>
+                        <p>Stok Rendah</p>
+                        <h3 id="stok-rendah">0</h3>
                     </div>
-                    <div class="stat-icon orange"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                    <div class="stat-icon icon-orange"><i class="fa-solid fa-triangle-exclamation"></i></div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-info">
-                        <h3>Transaksi Hari Ini</h3>
-                        <p id="transaksi-hari-ini">Memuat...</p>
+                        <p>Transaksi Hari Ini</p>
+                        <h3 id="transaksi-hari-ini">0</h3>
                     </div>
-                    <div class="stat-icon green"><i class="fa-solid fa-file-invoice"></i></div>
+                    <div class="stat-icon icon-green"><i class="fa-solid fa-file-invoice"></i></div>
                 </div>
-            </section>
+            </div>
 
             <div class="content-grid">
-                <!-- Tabel Aktivitas Terbaru -->
                 <div class="table-container">
                     <div class="table-header">
                         <h2>Aktivitas Transaksi Terbaru</h2>
-                        <button class="btn-refresh" id="btn-refresh"><i class="fa-solid fa-sync"></i> Refresh</button>
+                        <button class="btn-refresh" id="btn-refresh">
+                            <i class="fa-solid fa-arrows-rotate"></i> Refresh
+                        </button>
                     </div>
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>TANGGAL & WAKTU</th>
-                                <th>BARANG</th>
-                                <th>TIPE</th>
-                                <th>QTY</th>
-                            </tr>
-                        </thead>
-                        <tbody id="table-body">
-                            <tr>
-                                <td colspan="4" class="text-center">Mengambil data dari server...</td>
-                            </tr>
-                        </tbody>
-                    </table>
+                    <div class="table-responsive">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>TANGGAL & WAKTU</th>
+                                    <th>BARANG</th>
+                                    <th>TIPE</th>
+                                    <th>QTY</th>
+                                </tr>
+                            </thead>
+                            <tbody id="transaction-table-body">
+                                <tr>
+                                    <td>
+                                        <span class="date-row"><i class="fa-regular fa-calendar-days"></i> 26/05/2026</span>
+                                        <span class="time-row"><i class="fa-regular fa-clock"></i> 16:44</span>
+                                    </td>
+                                    <td>Pipa PVC 4"</td>
+                                    <td><span class="badge badge-out">KELUAR</span></td>
+                                    <td class="qty-out">2</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
 
-                <!-- Aksi Cepat -->
-                <div class="action-container">
+                <div class="quick-actions">
                     <h2>Aksi Cepat</h2>
-                    <div class="action-buttons">
-                        <button class="btn btn-primary"><i class="fa-solid fa-plus"></i> Transaksi Baru</button>
-                        <button class="btn btn-success"><i class="fa-solid fa-barcode"></i> Tambah Barang</button>
-                        <button class="btn btn-purple"><i class="fa-solid fa-download"></i> Export Data</button>
-                        <button class="btn btn-dark"><i class="fa-solid fa-rotate"></i> Sync Stok</button>
+                    <div class="actions-grid">
+                        <button class="btn-action btn-blue"><i class="fa-solid fa-circle-plus"></i> Transaksi Baru</button>
+                        <button class="btn-action btn-green"><i class="fa-solid fa-boxes-stacked"></i> Tambah Barang</button>
+                        <button class="btn-action btn-purple"><i class="fa-solid fa-file-export"></i> Export Data</button>
+                        <button class="btn-action btn-dark"><i class="fa-solid fa-arrows-rotate"></i> Sync Stok</button>
                     </div>
                 </div>
             </div>
@@ -104,32 +114,21 @@
     <script src="script.js"></script>
     
     <script>
-        document.getElementById('sidebar-toggle').addEventListener('click', function() {
-            document.querySelector('.sidebar').classList.toggle('active');
-        });
-    </script>
-<body>
-    <div class="sidebar-overlay" id="sidebar-overlay"></div>
-
-    <div class="container">
-    <script src="script.js"></script>
-    
-    <script>
         const sidebar = document.querySelector('.sidebar');
         const sidebarToggle = document.getElementById('sidebar-toggle');
         const overlay = document.getElementById('sidebar-overlay');
 
-        // Fungsi untuk membuka/menutup sidebar
+        // Fungsi pemicu buka-tutup
         function toggleSidebar() {
             sidebar.classList.toggle('active');
             overlay.classList.toggle('active');
         }
 
-        // Event listener saat tombol hamburger diklik
-        sidebarToggle.addEventListener('click', toggleSidebar);
-
-        // Event listener saat area gelap (overlay) diklik
-        overlay.addEventListener('click', toggleSidebar);
+        // Jalankan fungsi saat tombol hamburger atau lapisan gelap diklik
+        if (sidebarToggle && overlay) {
+            sidebarToggle.addEventListener('click', toggleSidebar);
+            overlay.addEventListener('click', toggleSidebar);
+        }
     </script>
 </body>
 </html>
