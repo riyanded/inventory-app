@@ -672,3 +672,169 @@ body.light-mode {
     font-weight: 700;
     text-align: left;
 }
+
+/* ==========================================
+   HALAMAN TRANSAKSI STYLING
+   ========================================== */
+.transaksi-header {
+    margin-bottom: 24px;
+}
+.transaksi-header h2 {
+    color: #1e293b;
+    margin-bottom: 5px;
+}
+.transaksi-header p {
+    color: #64748b;
+    font-size: 0.95rem;
+}
+
+.transaksi-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* 2 Kolom Kiri & Kanan */
+    gap: 24px;
+}
+
+.transaksi-card {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.transaksi-card h3 {
+    font-size: 1.1rem;
+    color: #0f172a;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Bagian Scanner */
+.scanner-display {
+    background-color: #0f172a; /* Warna gelap ala kamera mati */
+    border-radius: 8px;
+    height: 300px;
+    margin-bottom: 20px;
+    width: 100%;
+}
+.btn-scan-action {
+    width: 100%;
+    padding: 12px;
+    background-color: #3b82f6; /* Biru */
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 1rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    transition: 0.2s;
+}
+.btn-scan-action:hover { background-color: #2563eb; }
+
+/* Bagian Form */
+.form-group {
+    margin-bottom: 16px;
+}
+.form-group label {
+    display: block;
+    font-size: 0.85rem;
+    color: #64748b;
+    margin-bottom: 8px;
+}
+.form-control {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    color: #334155;
+    outline: none;
+    font-family: inherit;
+}
+.form-control:focus { border-color: #3b82f6; }
+.form-row {
+    display: flex;
+    gap: 16px;
+}
+.w-50 { width: 50%; }
+
+/* Form Khusus (Select, Search, Add) */
+select.form-control {
+    background-color: #eff6ff; /* Biru muda */
+    color: #1d4ed8;
+    font-weight: 600;
+    cursor: pointer;
+}
+.form-section-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #334155;
+    margin: 24px 0 12px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.search-item-group {
+    display: flex;
+    gap: 10px;
+}
+.btn-search-item {
+    background-color: #eff6ff;
+    color: #3b82f6;
+    border: none;
+    border-radius: 8px;
+    padding: 0 16px;
+    cursor: pointer;
+}
+.add-item-group {
+    display: flex;
+    gap: 16px;
+    align-items: flex-end;
+    margin-top: 16px;
+}
+.qty-input { width: 30%; }
+.btn-add-list {
+    width: 70%;
+    padding: 11px;
+    background-color: #1e293b; /* Biru Dongker / Gelap */
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+}
+.btn-add-list:hover { background-color: #0f172a; }
+
+.btn-save-transaksi {
+    width: 100%;
+    padding: 14px;
+    background-color: #22c55e; /* Hijau */
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    margin-top: 24px;
+}
+.btn-save-transaksi:hover { background-color: #16a34a; }
+
+/* Responsive untuk layar kecil (HP) */
+@media (max-width: 992px) {
+    .transaksi-grid {
+        grid-template-columns: 1fr; /* Jadi 1 kolom bersusun atas bawah */
+    }
+}

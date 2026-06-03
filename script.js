@@ -386,3 +386,45 @@ function transaksiBarang(sku, nama) {
     // Ini bisa dihubungkan ke Modal Transaksi Keluar/Masuk nantinya
     alert(`Anda menekan tombol Transaksi untuk barang:\nNama: ${nama}\nSKU: ${sku}`);
 }
+
+// Fungsi untuk mengganti form IN dan OUT
+function toggleFormTransaksi() {
+    const tipe = document.getElementById('tipe-transaksi').value;
+    const formIn = document.getElementById('form-in-fields');
+    const formOut = document.getElementById('form-out-fields');
+
+    if (tipe === 'in') {
+        formIn.style.display = 'block';
+        formOut.style.display = 'none';
+    } else {
+        formIn.style.display = 'none';
+        formOut.style.display = 'block';
+    }
+}
+
+// Tambahkan logika perpindahan menu jika belum ada
+document.addEventListener('DOMContentLoaded', () => {
+    const menuDashboard = document.getElementById('menu-dashboard');
+    const menuInventori = document.getElementById('menu-inventori');
+    const menuTransaksi = document.getElementById('menu-transaksi'); // <-- Menu baru
+
+    const secDashboard = document.getElementById('dashboard-section');
+    const secInventori = document.getElementById('inventori-section');
+    const secTransaksi = document.getElementById('transaksi-section'); // <-- Section baru
+    const pageTitle = document.getElementById('page-title');
+
+    function switchPage(activeMenu, activeSection, title) {
+        // Hapus status active dari semua
+        [menuDashboard, menuInventori, menuTransaksi].forEach(m => m.classList.remove('active'));
+        [secDashboard, secInventori, secTransaksi].forEach(s => s.classList.remove('active'));
+        
+        // Tambahkan active ke yang diklik
+        activeMenu.classList.add('active');
+        activeSection.classList.add('active');
+        pageTitle.textContent = title;
+    }
+
+    if(menuDashboard) menuDashboard.addEventListener('click', () => switchPage(menuDashboard, secDashboard, 'Dashboard'));
+    if(menuInventori) menuInventori.addEventListener('click', () => switchPage(menuInventori, secInventori, 'Manajemen Inventori'));
+    if(menuTransaksi) menuTransaksi.addEventListener('click', () => switchPage(menuTransaksi, secTransaksi, 'Transaksi Barang'));
+});
