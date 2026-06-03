@@ -63,7 +63,7 @@
                     <div class="stat-card">
                         <div class="stat-info">
                             <p>Total Barang</p>
-                            <h3 id="total-barang">2</h3>
+                            <h3 id="total-barang">0</h3>
                         </div>
                         <div class="stat-icon icon-blue"><i class="fa-solid fa-box"></i></div>
                     </div>
@@ -129,18 +129,24 @@
             </div>
 
             <div id="inventori-section" class="page-section">
-                <div class="inventori-header">
-                    <div class="inventori-actions">
-                        <div class="search-box">
-                            <i class="fa-solid fa-magnifying-glass"></i>
-                            <input type="text" id="searchInput" placeholder="Cari SKU atau nama...">
-                        </div>
-                        <button id="btnExport"><i class="fa-solid fa-file-export"></i> Export</button>
-                        <button id="btnSync"><i class="fa-solid fa-rotate"></i> Sync Stok</button>
+                
+                <div class="action-bar-container">
+                    <div class="search-wrapper">
+                        <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                        <input type="text" id="searchInput" placeholder="Cari SKU atau nama...">
+                    </div>
+                    
+                    <div class="button-group">
+                        <button id="btnExport" class="btn-purple">
+                            <i class="fa-solid fa-file-export"></i> Export
+                        </button>
+                        <button id="btnSync" class="btn-dark">
+                            <i class="fa-solid fa-rotate"></i> Sync Stok
+                        </button>
                     </div>
                 </div>
 
-                <div class="table-container">
+                <div class="table-scroll-container">
                     <table class="data-table">
                         <thead>
                             <tr>
@@ -156,6 +162,7 @@
                             </tbody>
                     </table>
                 </div>
+                
             </div>
         </main>
     </div>
@@ -163,6 +170,7 @@
     <script src="script.js"></script>
     
     <script>
+        // FUNGSI UNTUK MENGATUR SIDEBAR DI LAYAR KECIL (MOBILE)
         const sidebar = document.querySelector('.sidebar');
         const sidebarToggle = document.getElementById('sidebar-toggle');
         const overlay = document.getElementById('sidebar-overlay');

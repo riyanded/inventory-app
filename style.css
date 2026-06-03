@@ -565,3 +565,110 @@ body.light-mode {
     margin-right: 10px;
     font-size: 16px;
 }
+
+/* ==========================================
+   DESAIN ACTION BAR (SEARCH & BUTTONS)
+   ========================================== */
+.action-bar-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.search-wrapper {
+    position: relative;
+    flex: 1;
+    min-width: 250px;
+    max-width: 400px;
+}
+
+.search-wrapper .search-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94a3b8;
+    font-size: 14px;
+}
+
+.search-wrapper input {
+    width: 100%;
+    padding: 10px 16px 10px 40px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 14px;
+    outline: none;
+    transition: all 0.2s;
+    color: #1e293b;
+}
+
+.search-wrapper input:focus {
+    border-color: #4361ee;
+    box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.15);
+}
+
+.button-group {
+    display: flex;
+    gap: 10px;
+}
+
+/* Tombol Berbasis ID & Class agar Aman */
+#btnExport.btn-purple, #btnSync.btn-dark {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    color: #ffffff;
+    transition: background 0.2s, transform 0.1s;
+}
+
+#btnExport.btn-purple {
+    background-color: #a855f7; /* Warna Ungu */
+}
+#btnExport.btn-purple:hover {
+    background-color: #9333ea;
+}
+
+#btnSync.btn-dark {
+    background-color: #1e293b; /* Warna Charcoal/Gelap */
+}
+#btnSync.btn-dark:hover {
+    background-color: #0f172a;
+}
+
+#btnExport:active, #btnSync:active {
+    transform: scale(0.97);
+}
+
+
+/* ==========================================
+   FITUR HEADER STATIS (STICKY TABLE HEADER)
+   ========================================== */
+.table-scroll-container {
+    max-height: 650px; /* Batasi tinggi tabel (atur sesuai kenyamanan layar Anda) */
+    overflow-y: auto;  /* Mengaktifkan scrollbar internal khusus area data tabel */
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+/* Mengunci Header Tabel tetap di atas */
+.table-scroll-container table thead th {
+    position: sticky;
+    top: 0;
+    background-color: #ffffff; /* Wajib diisi warna solid agar teks data di bawahnya ter-cover */
+    z-index: 10;
+    box-shadow: inset 0 -2px 0 #e2e8f0; /* Garis batas bawah header agar tetap terlihat tegas */
+    padding: 14px 16px;
+    color: #64748b;
+    font-size: 12px;
+    font-weight: 700;
+    text-align: left;
+}
