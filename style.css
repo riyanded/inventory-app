@@ -838,3 +838,23 @@ select.form-control {
         grid-template-columns: 1fr; /* Jadi 1 kolom bersusun atas bawah */
     }
 }
+
+/* Perbaikan warna tombol Transaksi Baru agar kontras dan terbaca */
+.btn-blue-primary {
+    background-color: #2563eb !important; /* Biru solid */
+    color: #ffffff !important;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+}
+
+.btn-blue-primary:hover {
+    background-color: #1d4ed8 !important;
+}

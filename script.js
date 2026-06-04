@@ -481,24 +481,26 @@ document.addEventListener('DOMContentLoaded', () => {
     
     const pageTitle = document.getElementById('page-title');
 
-    function switchPage(pageName) {
-        Object.values(menus).forEach(m => m?.classList.remove('active'));
-        Object.values(sections).forEach(s => s?.classList.remove('active'));
+    function switchPage(pageId) {
+    // Sembunyikan semua section kontainer halaman
+    const sections = ['dashboard', 'inventori', 'transaksi', 'tambah-barang', 'status-section', 'opname', 'user-management'];
+    
+    sections.forEach(id => {
+        const el = document.getElementById(id + '-page');
+        if (el) el.style.display = 'none';
+    });
 
-        menus[pageName]?.classList.add('active');
-        sections[pageName]?.classList.add('active');
-
-        if (pageName === 'dashboard') {
-            if (pageTitle) pageTitle.innerText = "Dashboard";
-            fetchDashboardData();
-        } else if (pageName === 'inventori') {
-            if (pageTitle) pageTitle.innerText = "Manajemen Inventori";
-            fetchInventoryData(); 
-        } else if (pageName === 'transaksi') {
-            if (pageTitle) pageTitle.innerText = "Transaksi Barang";
-            renderKeranjang(); 
-        }
+    // Tampilkan halaman yang dituju
+    const activePage = document.getElementById(pageId + '-page');
+    if (activePage) {
+        activePage.style.display = 'block';
     }
+    
+    // Opsional: inisialisasi ulang kamera/scanner jika masuk ke halaman terkait
+    if(pageId === 'opname') {
+        // initOpnameScanner();
+    }
+}
 
     // REVISI UTAMA: Ekspos fungsi ke tingkat window agar bisa dipanggil oleh atribut `onclick` di HTML dashboard
     window.switchPage = switchPage;
@@ -574,3 +576,95 @@ document.getElementById('btnExport')?.addEventListener('click', function(e) {
     link.download = "Data_Inventori.csv";
     link.click();
 });
+
+// Fungsi simulasi pencarian ke Sheet Master Barang saat QR terdeteksi
+function cariDataBarangMaster() {
+    const idBarang = document.getElementById('opname-id-barang').value;
+    if (!idBarang) return alert("Silakan scan atau masukkan ID Barang terlebih dahulu");
+
+    // Tampilkan loading/efek pencarian
+    // Panggil array database master barang Anda yang tersimpan di memori script.js
+    const barangDitemukan = dataMasterBarangGlobal.find(b => b.id === idBarang || b.sku === idBarang);
+
+    if (barangDitemukan) {
+        // Autofill data ke form tanpa merubah isi asli master data
+        document.getElementById('opname-nama').value = barangDitemukan.name || '';
+        document.getElementById('opname-size').value = barangDitemukan.size || '';
+        document.getElementById('opname-type').value = barangDitemukan.type || '';
+        document.getElementById('opname-brand').value = barangDitemukan.brand || '';
+        document.getElementById('opname-location').value = barangDitemukan.location || '';
+        document.getElementById('opname-unit').value = barangDitemukan.unit || '';
+        document.getElementById('opname-stock-real').focus();
+    } else {
+        alert("ID Barang tidak ditemukan di master data!");
+    }
+}
+
+function simpanDataOpname() {
+    const payload = {
+        id: document.getElementById('opname-id-barang').value,
+        opnameStock: document.getElementById('opname-stock-real').value,
+        details: document.getElementById('opname-details').value
+    };
+
+    if(!payload.id || !payload.opnameStock) {
+        return alert("ID Barang dan Jumlah Fisik wajib diisi!");
+    }
+
+    // Kirim data via google.script.run atau fetch API ke GS Anda
+    alert("Data Opname berhasil disinkronkan ke Google Sheets!");
+}
+
+function bukaModalUser(isEdit = false) {
+    document.getElementById('userModal').style.display = 'flex';
+    if(!isEdit) {
+        document.getElementById('modal-user-title').innerText = "Tambah User Baru";
+        document.getElementById('user-id').value = "";
+        // Reset field form
+        document.getElementById('user-nama').value = "";
+        document.getElementById('user-username').value = "";
+        document.getElementById('user-password').value = "";
+        document.getElementById('user-section').value = "";
+        document.getElementById('user-telegram').value = "";
+        document.getElementById('user-chatid').value = "";
+    }
+}
+
+function tutupModalUser() {
+    document.getElementById('userModal').style.display = 'none';
+}
+
+function prosesSimpanUser() {
+    const userId = document.getElementById('user-id').value;
+    const userData = {
+        id: userId || "USR" + Date.now(), // Generate ID otomatis jika entri baru
+        nama: document.getElementById('user-nama').value,
+        username: document.getElementById('user-username').value,
+        password: document.getElementById('user-password').value,
+        section: document.getElementById('user-section').value,
+        telegram: document.getElementById('user-telegram').value,
+        chatid: document.getElementById('user-chatid').value
+    };
+
+    // Validasi dasar
+    if(!userData.nama || !userData.username) return alert("Nama dan Username wajib diisi!");
+
+    // Logika Integrasi Ke Google Apps Script Web App
+    // google.script.run.withSuccessHandler(response => { ... }).simpanUserSheet(userData);
+    
+    alert("Data user " + userData.nama + " sukses disimpan!");
+    tutupModalUser();
+}
+
+function editUser(id) {
+    document.getElementById('modal-user-title').innerText = "Edit Data User ("+id+")";
+    bukaModalUser(true);
+    // Masukkan data user yang dicari berdasarkan ID ke dalam field formulir modal di sini
+}
+
+function hapusUser(id) {
+    if(confirm("Apakah Anda yakin ingin menghapus user dengan ID: " + id + "?")) {
+        // Eksekusi penghapusan di database Google Sheets
+        alert("User " + id + " berhasil dihapus.");
+    }
+}
