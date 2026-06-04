@@ -1,481 +1,975 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Inventory Management Dashboard</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
     <div class="sidebar-overlay" id="sidebar-overlay"></div>
 
     <div class="container">
-        <div class="sidebar">
-            <div class="logo">
-                <h2>Inventory</h2>
-                <span>Management v1.0</span>
-            </div>
-            <ul class="nav-links">
-                <li onclick="switchPage('dashboard')"><i class="fa-solid fa-chart-pie"></i> Dashboard</li>
-                <li onclick="switchPage('inventori')"><i class="fa-solid fa-boxes-stacked"></i> Inventori</li>
-                <li onclick="switchPage('transaksi')"><i class="fa-solid fa-exchange-alt"></i> Transaksi</li>
-                <li onclick="switchPage('tambah-barang')"><i class="fa-solid fa-plus-circle"></i> Tambah Barang</li>
-                <li onclick="switchPage('status-section')"><i class="fa-solid fa-network-wired"></i> Status Section</li>
-                <li onclick="switchPage('opname')"><i class="fa-solid fa-clipboard-check"></i> Opname Stock</li>
-                <li onclick="switchPage('user-management')"><i class="fa-solid fa-user-gear"></i> Management User</li>
-            </ul>
-            </div>
+      <div class="sidebar">
+        <div class="logo">
+          <h2>Inventory</h2>
+          <span>Management v1.0</span>
+        </div>
+        <ul class="nav-links">
+          <li
+            id="menu-dashboard"
+            class="nav-item active"
+            onclick="switchPage('dashboard', 'Dashboard')"
+          >
+            <i class="fa-solid fa-chart-pie"></i> Dashboard
+          </li>
+          <li
+            id="menu-inventori"
+            class="nav-item"
+            onclick="switchPage('inventori', 'Manajemen Inventori')"
+          >
+            <i class="fa-solid fa-boxes-stacked"></i> Inventori
+          </li>
+          <li
+            id="menu-transaksi"
+            class="nav-item"
+            onclick="switchPage('transaksi', 'Transaksi Barang')"
+          >
+            <i class="fa-solid fa-exchange-alt"></i> Transaksi
+          </li>
+          <li
+            id="menu-tambah-barang"
+            class="nav-item"
+            onclick="switchPage('tambah-barang', 'Tambah Barang Baru')"
+          >
+            <i class="fa-solid fa-plus-circle"></i> Tambah Barang
+          </li>
+          <li
+            id="menu-status-section"
+            class="nav-item"
+            onclick="switchPage('status-section', 'Status Section')"
+          >
+            <i class="fa-solid fa-network-wired"></i> Status Section
+          </li>
+          <li
+            id="menu-opname"
+            class="nav-item"
+            onclick="switchPage('opname', 'Opname Stock')"
+          >
+            <i class="fa-solid fa-clipboard-check"></i> Opname Stock
+          </li>
+          <li
+            id="menu-user-management"
+            class="nav-item"
+            onclick="switchPage('user-management', 'Management User')"
+          >
+            <i class="fa-solid fa-user-gear"></i> Management User
+          </li>
+        </ul>
 
-            <button class="btn-action btn-blue-primary" onclick="switchPage('transaksi')">
-                <i class="fa-solid fa-plus"></i> Transaksi Baru
+        <button
+          class="btn-action btn-blue-primary"
+          onclick="switchPage('transaksi', 'Transaksi Barang')"
+          style="
+            margin: 20px 15px;
+            width: calc(100% - 30px);
+            background-color: #2563eb !important;
+            color: #ffffff !important;
+            opacity: 1 !important;
+            visibility: visible !important;
+          "
+        >
+          <i class="fa-solid fa-plus"></i> Transaksi Baru
+        </button>
+      </div>
+
+      <main class="main-content">
+        <header>
+          <div class="header-left">
+            <button id="sidebar-toggle" class="btn-toggle">
+              <i class="fa-solid fa-bars"></i>
+            </button>
+            <h1 id="page-title">Dashboard</h1>
+          </div>
+
+          <div class="header-right">
+            <button id="theme-toggle" class="btn-icon" title="Ganti Tema">
+              <i class="fa-solid fa-moon"></i>
             </button>
 
-        <main class="main-content">
-            <header>
-                <div class="header-left">
-                    <button id="sidebar-toggle" class="btn-toggle">
-                        <i class="fa-solid fa-bars"></i>
-                    </button>
-                    <h1 id="page-title">Dashboard</h1>
+            <div class="user-profile" id="profile-menu">
+              <div class="avatar"><i class="fa-solid fa-user"></i></div>
+              <div class="dropdown-menu" id="dropdown-menu">
+                <div class="dropdown-header">
+                  <p id="user-name">Tamu</p>
+                  <span class="role" id="user-role">Belum Login</span>
                 </div>
-                
-                <div class="header-right">
-                    <button id="theme-toggle" class="btn-icon" title="Ganti Tema">
-                        <i class="fa-solid fa-moon"></i>
-                    </button>
-
-                    <div class="user-profile" id="profile-menu">
-                        <div class="avatar"><i class="fa-solid fa-user"></i></div>
-                        
-                        <div class="dropdown-menu" id="dropdown-menu">
-                            <div class="dropdown-header">
-                                <p id="user-name">Tamu</p>
-                                <span class="role" id="user-role">Belum Login</span>
-                            </div>
-                            <hr>
-                            <a href="#" class="dropdown-item" id="btn-login"><i class="fa-solid fa-right-to-bracket"></i> Login (Admin)</a>
-                            <a href="#" class="dropdown-item" id="btn-logout" style="display: none;"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
-                        </div>
-                    </div>
-                </div>
-            </header>
-
-            <div id="dashboard-section" class="page-section active">
-                <div class="overview-grid">
-    <div class="stat-card">
-        <div class="stat-info">
-            <p>Total Barang</p>
-            <h3 id="total-barang">0</h3>
-        </div>
-        <div class="stat-icon icon-blue"><i class="fa-solid fa-box"></i></div>
-    </div>
-
-    <div class="stat-card">
-        <div class="stat-info">
-            <p>Stok Rendah</p>
-            <h3 id="stok-rendah">0</h3>
-        </div>
-        <div class="stat-icon icon-orange"><i class="fa-solid fa-triangle-exclamation"></i></div>
-    </div>
-
-    <div class="stat-card">
-        <div class="stat-info">
-            <p>Transaksi Hari Ini</p>
-            <h3 id="transaksi-hari-ini">0</h3>
-        </div>
-        <div class="stat-icon icon-green"><i class="fa-solid fa-file-invoice"></i></div>
-    </div>
-
-    <div class="stat-card">
-        <div class="stat-info">
-            <p>Transaksi Bulan Ini</p>
-            <h3 id="transaksi-bulan-ini">0</h3>
-        </div>
-        <div class="stat-icon" style="background-color: #f3e8ff; color: #a855f7;">
-            <i class="fa-solid fa-calendar-check"></i>
-        </div>
-    </div>
-</div>
-
-                <div class="content-grid">
-                    <div class="table-container">
-                        <div class="table-header">
-                            <h2>Aktivitas Transaksi Terbaru</h2>
-                            <button class="btn-refresh" id="btn-refresh">
-                                <i class="fa-solid fa-arrows-rotate"></i> Refresh
-                            </button>
-                        </div>
-                        <div class="table-responsive">
-                            <table class="data-table">
-                                <thead>
-                                    <tr>
-                                        <th>TANGGAL & WAKTU</th>
-                                        <th>BARANG</th>
-                                        <th>TIPE</th>
-                                        <th>QTY</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="transaction-table-body">
-                                    <tr>
-                                        <td>
-                                            <span class="date-row"><i class="fa-regular fa-calendar-days"></i> 26/05/2026</span>
-                                            <span class="time-row"><i class="fa-regular fa-clock"></i> 16:44</span>
-                                        </td>
-                                        <td>Pipa PVC 4"</td>
-                                        <td><span class="badge badge-out">KELUAR</span></td>
-                                        <td class="qty-out">2</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <div class="quick-actions">
-                        <h2>Aksi Cepat</h2>
-                        <div class="actions-grid">
-                            <button class="btn-action btn-primary" onclick="switchPage('transaksi')"><i class="fa-solid fa-plus-circle"></i> Transaksi Baru</button>
-                            <button class="btn-action btn-green"><i class="fa-solid fa-boxes-stacked"></i> Tambah Barang</button>
-                            <button class="btn-action btn-purple"><i class="fa-solid fa-file-export"></i> Export Data</button>
-                            <button class="btn-action btn-dark"><i class="fa-solid fa-arrows-rotate"></i> Sync Stok</button>
-                        </div>
-                    </div>
-                </div>
+                <hr />
+                <a href="#" class="dropdown-item" id="btn-login"
+                  ><i class="fa-solid fa-right-to-bracket"></i> Login (Admin)</a
+                >
+                <a
+                  href="#"
+                  class="dropdown-item"
+                  id="btn-logout"
+                  style="display: none"
+                  ><i class="fa-solid fa-right-from-bracket"></i> Logout</a
+                >
+              </div>
             </div>
+          </div>
+        </header>
 
-            <div id="inventori-section" class="page-section">
-                <div class="action-bar-container">
-                    <div class="search-wrapper">
-                        <i class="fa-solid fa-magnifying-glass search-icon"></i>
-                        <input type="text" id="searchInput" placeholder="Cari SKU atau nama...">
-                    </div>
-                    
-                    <div class="button-group">
-                        <button id="btnExport" class="btn-purple">
-                            <i class="fa-solid fa-file-export"></i> Export
-                        </button>
-                        <button id="btnSync" class="btn-dark">
-                            <i class="fa-solid fa-rotate"></i> Sync Stok
-                        </button>
-                    </div>
-                </div>
-
-                <div class="table-scroll-container">
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>BARANG</th>
-                                <th>KATEGORI</th>
-                                <th>LOKASI</th>
-                                <th>STOK / MIN</th>
-                                <th>STATUS</th>
-                                <th>AKSI</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tabel-inventori-body">
-                            </tbody>
-                    </table>
-                </div>
+        <div id="dashboard-section" class="page-section active">
+          <div class="overview-grid">
+            <div class="stat-card">
+              <div class="stat-info">
+                <p>Total Barang</p>
+                <h3 id="total-barang">0</h3>
+              </div>
+              <div class="stat-icon icon-blue">
+                <i class="fa-solid fa-box"></i>
+              </div>
             </div>
-
-            <div id="transaksi-section" class="page-section">
-                <div style="max-width: 800px; margin: 0 auto; width: 100%;">
-                    
-                    <div class="transaksi-card form-card">
-                        <h3><i class="fa-solid fa-pen"></i> Input Transaksi Baru</h3>
-                        
-                        <div class="form-group">
-                            <label>Tipe Transaksi</label>
-                            <div class="select-wrapper">
-                                <select id="tipe-transaksi" class="form-control" onchange="toggleFormTransaksi()">
-                                    <option value="in">📥 BARANG MASUK (IN)</option>
-                                    <option value="out">📤 BARANG KELUAR (OUT)</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="form-section-title"><i class="fa-solid fa-box"></i> 1. Pilih Barang (Maks 5)</div>
-                        
-                        <div class="search-item-group" style="position: relative;">
-                            <input type="text" id="txSearchInput" placeholder="Ketik Nama Barang atau SKU..." class="form-control" autocomplete="off">
-                            <button class="btn-search-item" id="txSearchBtn" type="button"><i class="fa-solid fa-magnifying-glass"></i></button>
-                            
-                            <div id="searchDropdown" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: var(--bg-card, #ffffff); border: 1px solid var(--border-color, #ccc); max-height: 220px; overflow-y: auto; z-index: 999; box-shadow: 0 4px 12px rgba(0,0,0,0.15); border-radius: 6px;"></div>
-                        </div>
-                        
-                        <div id="tx-product-preview" style="margin: 8px 0; font-size: 13px; font-weight: 500; min-height: 20px;"></div>
-                        
-                        <div class="add-item-group">
-                            <div class="qty-input">
-                                <label>Jumlah (Qty)</label>
-                                <input type="number" id="txQtyInput" value="1" min="1" class="form-control">
-                            </div>
-                            <button class="btn-add-list" id="txAddBtn" type="button"><i class="fa-solid fa-cart-plus"></i> Tambah ke Daftar</button>
-                        </div>
-
-                        <div id="tx-cart-container" style="margin: 16px 0 24px 0; padding: 12px; background: rgba(0,0,0,0.02); border-radius: 8px; border: 1px dashed var(--border-color, #ccc); display: none;"></div>
-
-                        <div class="form-section-title"><i class="fa-solid fa-circle-info"></i> 2. Lengkapi Data Pendukung</div>
-                        
-                        <div id="form-in-fields" class="dynamic-fields">
-                            <div class="form-group">
-                                <label>Applicant</label>
-                                <input type="text" placeholder="Nama pemohon" class="form-control">
-                            </div>
-                            <div class="form-row">
-                                <div class="form-group w-50">
-                                    <label>No PO</label>
-                                    <input type="text" placeholder="Nomor PO" class="form-control">
-                                </div>
-                                <div class="form-group w-50">
-                                    <label>Supplier</label>
-                                    <input type="text" placeholder="Nama Supplier" class="form-control">
-                                </div>
-                            </div>
-                        </div>
-
-                        <div id="form-out-fields" class="dynamic-fields" style="display: none;">
-                            <div class="form-row">
-                                <div class="form-group w-50">
-                                    <label>Section</label>
-                                    <input type="text" placeholder="Misal: Gudang A" class="form-control">
-                                </div>
-                                <div class="form-group w-50">
-                                    <label>Applicant</label>
-                                    <input type="text" placeholder="Nama pemohon" class="form-control">
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="form-group" style="margin-top: 16px;">
-                            <label>Details / Keterangan</label>
-                            <textarea placeholder="Catatan opsional..." class="form-control" rows="3"></textarea>
-                        </div>
-
-                        <div class="form-group" style="margin-top: 16px; margin-bottom: 24px;">
-                            <label><i class="fa-solid fa-camera"></i> Foto Bukti Transaksi (Kolom J)</label>
-                            <input type="file" id="transaction-photo" accept="image/*" class="form-control" style="padding: 8px;">
-                            
-                            <div id="photo-preview-container" style="margin-top: 10px; display: none;">
-                                <img id="photo-preview" src="" style="max-width: 120px; max-height: 120px; border-radius: 6px; border: 1px solid #ccc; object-fit: cover;">
-                            </div>
-                        </div>
-
-                        <button class="btn-save-transaksi"><i class="fa-solid fa-floppy-disk"></i> Simpan Transaksi</button>
-                    </div>
-                </div>
+            <div class="stat-card">
+              <div class="stat-info">
+                <p>Stok Rendah</p>
+                <h3 id="stok-rendah">0</h3>
+              </div>
+              <div class="stat-icon icon-orange">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+              </div>
             </div>
-
-            <div id="opname-page" class="page-section" style="display:none;">
-                <div class="transaksi-grid">
-                    <div class="transaksi-card scanner-card">
-                        <h3><i class="fa-solid fa-qrcode"></i> Scanner Barcode / QR Opname</h3>
-                        <div id="opname-scanner-display" class="scanner-display"></div>
-                        <button class="btn-scan-action" id="btn-start-opname-scan"><i class="fa-solid fa-play"></i> Mulai Scan QR</button>
-                    </div>
-
-                    <div class="transaksi-card form-card">
-                        <h3><i class="fa-solid fa-pen-to-square"></i> Input Opname Barang</h3>
-                        
-                        <div class="form-group">
-                            <label>ID Barang / SKU</label>
-                            <div style="display:flex; gap:10px;">
-                                <input type="text" id="opname-id-barang" class="form-control" placeholder="Scan QR atau ketik ID...">
-                                <button class="btn-search-item" onclick="cariDataBarangMaster()"><i class="fa-solid fa-search"></i></button>
-                            </div>
-                        </div>
-
-                        <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                            <div class="form-group">
-                                <label>Nama Barang</label>
-                                <input type="text" id="opname-nama" class="form-control" readonly style="background:#f1f5f9;">
-                            </div>
-                            <div class="form-group">
-                                <label>Size</label>
-                                <input type="text" id="opname-size" class="form-control" readonly style="background:#f1f5f9;">
-                            </div>
-                        </div>
-
-                        <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                            <div class="form-group">
-                                <label>Type</label>
-                                <input type="text" id="opname-type" class="form-control" readonly style="background:#f1f5f9;">
-                            </div>
-                            <div class="form-group">
-                                <label>Brand</label>
-                                <input type="text" id="opname-brand" class="form-control" readonly style="background:#f1f5f9;">
-                            </div>
-                        </div>
-
-                        <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                            <div class="form-group">
-                                <label>Location</label>
-                                <input type="text" id="opname-location" class="form-control" readonly style="background:#f1f5f9;">
-                            </div>
-                            <div class="form-group">
-                                <label>Unit</label>
-                                <input type="text" id="opname-unit" class="form-control" readonly style="background:#f1f5f9;">
-                            </div>
-                        </div>
-
-                        <div class="form-group" style="margin-top: 15px; padding: 10px; background: #fef08a; border-radius: 6px;">
-                            <label style="color: #854d0e; font-weight: bold;">Jumlah Fisik Terupdate (Opname Stock)</label>
-                            <input type="number" id="opname-stock-real" class="form-control" placeholder="Masukkan jumlah item di gudang asli" style="border: 2px solid #eab308;">
-                        </div>
-
-                        <div class="form-group">
-                            <label>Details / Keterangan Kualitatif</label>
-                            <textarea id="opname-details" class="form-control" placeholder="Catatan kondisi barang..."></textarea>
-                        </div>
-
-                        <button class="btn-save-transaksi" onclick="simpanDataOpname()" style="background:#16a34a;"><i class="fa-solid fa-floppy-disk"></i> Simpan Opname</button>
-                    </div>
-                </div>
+            <div class="stat-card">
+              <div class="stat-info">
+                <p>Transaksi Hari Ini</p>
+                <h3 id="transaksi-hari-ini">0</h3>
+              </div>
+              <div class="stat-icon icon-green">
+                <i class="fa-solid fa-file-invoice"></i>
+              </div>
             </div>
+            <div class="stat-card">
+              <div class="stat-info">
+                <p>Transaksi Bulan Ini</p>
+                <h3 id="transaksi-bulan-ini">0</h3>
+              </div>
+              <div
+                class="stat-icon"
+                style="background-color: #f3e8ff; color: #a855f7"
+              >
+                <i class="fa-solid fa-calendar-check"></i>
+              </div>
+            </div>
+          </div>
 
-            <div id="user-management-page" class="page-section" style="display:none;">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-                    <h2><i class="fa-solid fa-users"></i> Management User</h2>
-                    <button class="btn-blue-primary" onclick="bukaModalUser()" style="width:auto;"><i class="fa-solid fa-user-plus"></i> Tambah User Baru</button>
-                </div>
-
+          <div class="content-grid">
             <div class="table-container">
+              <div class="table-header">
+                <h2>Aktivitas Transaksi Terbaru</h2>
+                <button class="btn-refresh" id="btn-refresh">
+                  <i class="fa-solid fa-arrows-rotate"></i> Refresh
+                </button>
+              </div>
+              <div class="table-responsive">
                 <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Nama</th>
-                            <th>Username</th>
-                            <th>Section</th>
-                            <th>No. Telegram</th>
-                            <th>Chat ID</th>
-                            <th>Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody id="user-table-body">
-                        <tr>
-                            <td>USR001</td>
-                            <td>Eka</td>
-                            <td>eka_gudang</td>
-                            <td>Gudang A</td>
-                            <td>0812345678</td>
-                            <td>987654321</td>
-                            <td>
-                                <button class="btn-table-edit" onclick="editUser('USR001')"><i class="fa-solid fa-edit"></i></button>
-                                <button class="btn-table-delete" onclick="hapusUser('USR001')"><i class="fa-solid fa-trash"></i></button>
-                            </td>
-                        </tr>
-                    </tbody>
+                  <thead>
+                    <tr>
+                      <th>TANGGAL & WAKTU</th>
+                      <th>BARANG</th>
+                      <th>TIPE</th>
+                      <th>QTY</th>
+                    </tr>
+                  </thead>
+                  <tbody id="transaction-table-body">
+                    <tr>
+                      <td>
+                        <span class="date-row"
+                          ><i class="fa-regular fa-calendar-days"></i>
+                          26/05/2026</span
+                        >
+                        <span class="time-row"
+                          ><i class="fa-regular fa-clock"></i> 16:44</span
+                        >
+                      </td>
+                      <td>Pipa PVC 4"</td>
+                      <td><span class="badge badge-out">KELUAR</span></td>
+                      <td class="qty-out">2</td>
+                    </tr>
+                  </tbody>
                 </table>
+              </div>
             </div>
+
+            <div class="quick-actions">
+              <h2>Aksi Cepat</h2>
+              <div class="actions-grid">
+                <button
+                  class="btn-action btn-primary"
+                  onclick="switchPage('transaksi', 'Transaksi Barang')"
+                >
+                  <i class="fa-solid fa-plus-circle"></i> Transaksi Baru
+                </button>
+                <button
+                  class="btn-action btn-green"
+                  onclick="switchPage('tambah-barang', 'Tambah Barang Baru')"
+                >
+                  <i class="fa-solid fa-boxes-stacked"></i> Tambah Barang
+                </button>
+                <button class="btn-action btn-purple">
+                  <i class="fa-solid fa-file-export"></i> Export Data
+                </button>
+                <button class="btn-action btn-dark">
+                  <i class="fa-solid fa-arrows-rotate"></i> Sync Stok
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
 
-            <div id="userModal" class="modal-backdrop" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:999; justify-content:center; align-items:center;">
-                <div class="modal-content" style="background:#fff; padding:25px; border-radius:12px; width:450px; max-width:90%;">
-                    <h3 id="modal-user-title">Tambah User</h3>
-                    <input type="hidden" id="user-id">
-                    
-                    <div class="form-group" style="margin-bottom:12px;">
-                        <label>Nama Lengkap</label>
-                        <input type="text" id="user-nama" class="form-control">
-                    </div>
-                    <div class="form-group" style="margin-bottom:12px;">
-                        <label>Username</label>
-                        <input type="text" id="user-username" class="form-control">
-                    </div>
-                    <div class="form-group" style="margin-bottom:12px;">
-                        <label>Password</label>
-                        <input type="password" id="user-password" class="form-control">
-                    </div>
-                    <div class="form-group" style="margin-bottom:12px;">
-                        <label>Section / Bagian</label>
-                        <input type="text" id="user-section" class="form-control" placeholder="Contoh: Gudang A, ME, BW">
-                    </div>
-                    <div class="form-group" style="margin-bottom:12px;">
-                        <label>Nomor Telegram</label>
-                        <input type="text" id="user-telegram" class="form-control">
-                    </div>
-                    <div class="form-group" style="margin-bottom:15px;">
-                        <label>Chat ID Telegram</label>
-                        <input type="text" id="user-chatid" class="form-control">
-                    </div>
-
-                    <div style="display:flex; justify-content:flex-end; gap:10px;">
-                        <button onclick="tutupModalUser()" style="background:#cbd5e1; border:none; padding:8px 15px; border-radius:6px; cursor:pointer;">Batal</button>
-                        <button onclick="prosesSimpanUser()" style="background:#2563eb; color:#fff; border:none; padding:8px 15px; border-radius:6px; cursor:pointer;">Simpan Data</button>
-                    </div>
-                </div>
+        <div id="inventori-section" class="page-section" style="display: none">
+          <div class="action-bar-container">
+            <div class="search-wrapper">
+              <i class="fa-solid fa-magnifying-glass search-icon"></i>
+              <input
+                type="text"
+                id="searchInput"
+                placeholder="Cari SKU atau nama..."
+              />
             </div>
-        </main>
+            <div class="button-group">
+              <button id="btnExport" class="btn-purple">
+                <i class="fa-solid fa-file-export"></i> Export
+              </button>
+              <button id="btnSync" class="btn-dark">
+                <i class="fa-solid fa-rotate"></i> Sync Stok
+              </button>
+            </div>
+          </div>
+          <div class="table-scroll-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>BARANG</th>
+                  <th>KATEGORI</th>
+                  <th>LOKASI</th>
+                  <th>STOK / MIN</th>
+                  <th>STATUS</th>
+                  <th>AKSI</th>
+                </tr>
+              </thead>
+              <tbody id="tabel-inventori-body"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div id="transaksi-section" class="page-section" style="display: none">
+          <div style="max-width: 800px; margin: 0 auto; width: 100%">
+            <div class="transaksi-card form-card">
+              <h3><i class="fa-solid fa-pen"></i> Input Transaksi Baru</h3>
+              <div class="form-group">
+                <label>Tipe Transaksi</label>
+                <div class="select-wrapper">
+                  <select
+                    id="tipe-transaksi"
+                    class="form-control"
+                    onchange="toggleFormTransaksi()"
+                  >
+                    <option value="in">📥 BARANG MASUK (IN)</option>
+                    <option value="out">📤 BARANG KELUAR (OUT)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-section-title">
+                <i class="fa-solid fa-box"></i> 1. Pilih Barang (Maks 5)
+              </div>
+              <div class="search-item-group" style="position: relative">
+                <input
+                  type="text"
+                  id="txSearchInput"
+                  placeholder="Ketik Nama Barang atau SKU..."
+                  class="form-control"
+                  autocomplete="off"
+                />
+                <button class="btn-search-item" id="txSearchBtn" type="button">
+                  <i class="fa-solid fa-magnifying-glass"></i>
+                </button>
+                <div
+                  id="searchDropdown"
+                  style="
+                    display: none;
+                    position: absolute;
+                    top: 100%;
+                    left: 0;
+                    right: 0;
+                    background: #ffffff;
+                    border: 1px solid #ccc;
+                    max-height: 220px;
+                    overflow-y: auto;
+                    z-index: 999;
+                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+                    border-radius: 6px;
+                  "
+                ></div>
+              </div>
+              <div
+                id="tx-product-preview"
+                style="
+                  margin: 8px 0;
+                  font-size: 13px;
+                  font-weight: 500;
+                  min-height: 20px;
+                "
+              ></div>
+
+              <div class="add-item-group">
+                <div class="qty-input">
+                  <label>Jumlah (Qty)</label>
+                  <input
+                    type="number"
+                    id="txQtyInput"
+                    value="1"
+                    min="1"
+                    class="form-control"
+                  />
+                </div>
+                <button class="btn-add-list" id="txAddBtn" type="button">
+                  <i class="fa-solid fa-cart-plus"></i> Tambah ke Daftar
+                </button>
+              </div>
+              <div
+                id="tx-cart-container"
+                style="
+                  margin: 16px 0 24px 0;
+                  padding: 12px;
+                  background: rgba(0, 0, 0, 0.02);
+                  border-radius: 8px;
+                  border: 1px dashed #ccc;
+                  display: none;
+                "
+              ></div>
+
+              <div class="form-section-title">
+                <i class="fa-solid fa-circle-info"></i> 2. Lengkapi Data
+                Pendukung
+              </div>
+              <div id="form-in-fields" class="dynamic-fields">
+                <div class="form-group">
+                  <label>Applicant</label>
+                  <input
+                    type="text"
+                    placeholder="Nama pemohon"
+                    class="form-control"
+                  />
+                </div>
+                <div class="form-row">
+                  <div class="form-group w-50">
+                    <label>No PO</label
+                    ><input
+                      type="text"
+                      placeholder="Nomor PO"
+                      class="form-control"
+                    />
+                  </div>
+                  <div class="form-group w-50">
+                    <label>Supplier</label
+                    ><input
+                      type="text"
+                      placeholder="Nama Supplier"
+                      class="form-control"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div
+                id="form-out-fields"
+                class="dynamic-fields"
+                style="display: none"
+              >
+                <div class="form-row">
+                  <div class="form-group w-50">
+                    <label>Section</label
+                    ><input
+                      type="text"
+                      placeholder="Misal: Gudang A"
+                      class="form-control"
+                    />
+                  </div>
+                  <div class="form-group w-50">
+                    <label>Applicant</label
+                    ><input
+                      type="text"
+                      placeholder="Nama pemohon"
+                      class="form-control"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-group" style="margin-top: 16px">
+                <label>Details / Keterangan</label>
+                <textarea
+                  placeholder="Catatan opsional..."
+                  class="form-control"
+                  rows="3"
+                ></textarea>
+              </div>
+
+              <div
+                class="form-group"
+                style="margin-top: 16px; margin-bottom: 24px"
+              >
+                <label
+                  ><i class="fa-solid fa-camera"></i> Foto Bukti
+                  Transaksi</label
+                >
+                <input
+                  type="file"
+                  id="transaction-photo"
+                  accept="image/*"
+                  class="form-control"
+                  style="padding: 8px"
+                />
+                <div
+                  id="photo-preview-container"
+                  style="margin-top: 10px; display: none"
+                >
+                  <img
+                    id="photo-preview"
+                    src=""
+                    style="
+                      max-width: 120px;
+                      max-height: 120px;
+                      border-radius: 6px;
+                      border: 1px solid #ccc;
+                      object-fit: cover;
+                    "
+                  />
+                </div>
+              </div>
+              <button class="btn-save-transaksi">
+                <i class="fa-solid fa-floppy-disk"></i> Simpan Transaksi
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div
+          id="tambah-barang-section"
+          class="page-section"
+          style="display: none"
+        >
+          <div
+            class="transaksi-card form-card"
+            style="max-width: 600px; margin: 0 auto"
+          >
+            <h3>
+              <i class="fa-solid fa-plus-circle"></i> Tambah Master Barang Baru
+            </h3>
+            <p style="color: #64748b; font-size: 14px; margin-bottom: 15px">
+              Fitur penambahan data master item baru ke Google Sheets.
+            </p>
+          </div>
+        </div>
+
+        <div
+          id="status-section-section"
+          class="page-section"
+          style="display: none"
+        >
+          <div
+            class="transaksi-card form-card"
+            style="max-width: 600px; margin: 0 auto"
+          >
+            <h3>
+              <i class="fa-solid fa-network-wired"></i> Status Section
+              Monitoring
+            </h3>
+            <p style="color: #64748b; font-size: 14px; margin-bottom: 15px">
+              Pemantauan status divisi / ruang inventori secara real-time.
+            </p>
+          </div>
+        </div>
+
+        <div id="opname-section" class="page-section" style="display: none">
+          <div
+            class="transaksi-grid"
+            style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px"
+          >
+            <div class="transaksi-card scanner-card">
+              <h3>
+                <i class="fa-solid fa-qrcode"></i> Scanner Barcode / QR Opname
+              </h3>
+              <div
+                id="opname-scanner-display"
+                style="
+                  height: 200px;
+                  background: #e2e8f0;
+                  margin-bottom: 15px;
+                  border-radius: 8px;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  color: #64748b;
+                "
+              >
+                [ Area Kamera Scanner ]
+              </div>
+              <button
+                class="btn-scan-action"
+                style="
+                  width: 100%;
+                  padding: 10px;
+                  background: #2563eb;
+                  color: #fff;
+                  border: none;
+                  border-radius: 6px;
+                  cursor: pointer;
+                "
+              >
+                <i class="fa-solid fa-play"></i> Mulai Scan QR
+              </button>
+            </div>
+
+            <div class="transaksi-card form-card">
+              <h3>
+                <i class="fa-solid fa-pen-to-square"></i> Input Opname Barang
+              </h3>
+              <div class="form-group" style="margin-bottom: 12px">
+                <label>ID Barang / SKU</label>
+                <div style="display: flex; gap: 10px">
+                  <input
+                    type="text"
+                    id="opname-id-barang"
+                    class="form-control"
+                    placeholder="Scan QR atau ketik ID..."
+                  />
+                  <button
+                    class="btn-search-item"
+                    onclick="cariDataBarangMaster()"
+                    style="padding: 0 15px"
+                  >
+                    <i class="fa-solid fa-search"></i>
+                  </button>
+                </div>
+              </div>
+              <div
+                class="form-row"
+                style="
+                  display: grid;
+                  grid-template-columns: 1fr 1fr;
+                  gap: 10px;
+                  margin-bottom: 12px;
+                "
+              >
+                <div>
+                  <label>Nama Barang</label
+                  ><input
+                    type="text"
+                    id="opname-nama"
+                    class="form-control"
+                    readonly
+                    style="background: #f1f5f9"
+                  />
+                </div>
+                <div>
+                  <label>Size</label
+                  ><input
+                    type="text"
+                    id="opname-size"
+                    class="form-control"
+                    readonly
+                    style="background: #f1f5f9"
+                  />
+                </div>
+              </div>
+              <div
+                class="form-row"
+                style="
+                  display: grid;
+                  grid-template-columns: 1fr 1fr;
+                  gap: 10px;
+                  margin-bottom: 12px;
+                "
+              >
+                <div>
+                  <label>Type</label
+                  ><input
+                    type="text"
+                    id="opname-type"
+                    class="form-control"
+                    readonly
+                    style="background: #f1f5f9"
+                  />
+                </div>
+                <div>
+                  <label>Brand</label
+                  ><input
+                    type="text"
+                    id="opname-brand"
+                    class="form-control"
+                    readonly
+                    style="background: #f1f5f9"
+                  />
+                </div>
+              </div>
+              <div
+                class="form-row"
+                style="
+                  display: grid;
+                  grid-template-columns: 1fr 1fr;
+                  gap: 10px;
+                  margin-bottom: 12px;
+                "
+              >
+                <div>
+                  <label>Location</label
+                  ><input
+                    type="text"
+                    id="opname-location"
+                    class="form-control"
+                    readonly
+                    style="background: #f1f5f9"
+                  />
+                </div>
+                <div>
+                  <label>Unit</label
+                  ><input
+                    type="text"
+                    id="opname-unit"
+                    class="form-control"
+                    readonly
+                    style="background: #f1f5f9"
+                  />
+                </div>
+              </div>
+              <div
+                class="form-group"
+                style="
+                  margin-top: 15px;
+                  padding: 10px;
+                  background: #fef08a;
+                  border-radius: 6px;
+                  margin-bottom: 12px;
+                "
+              >
+                <label style="color: #854d0e; font-weight: bold"
+                  >Jumlah Fisik Terupdate (Opname Stock)</label
+                >
+                <input
+                  type="number"
+                  id="opname-stock-real"
+                  class="form-control"
+                  placeholder="Masukkan jumlah item asli"
+                />
+              </div>
+              <div class="form-group" style="margin-bottom: 15px">
+                <label>Details / Keterangan Kualitatif</label>
+                <textarea
+                  id="opname-details"
+                  class="form-control"
+                  placeholder="Catatan kondisi barang..."
+                ></textarea>
+              </div>
+              <button
+                class="btn-save-transaksi"
+                onclick="simpanDataOpname()"
+                style="
+                  background: #16a34a;
+                  width: 100%;
+                  color: #fff;
+                  padding: 12px;
+                  border: none;
+                  border-radius: 6px;
+                  cursor: pointer;
+                "
+              >
+                <i class="fa-solid fa-floppy-disk"></i> Simpan Opname
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div
+          id="user-management-section"
+          class="page-section"
+          style="display: none"
+        >
+          <div
+            style="
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              margin-bottom: 20px;
+            "
+          >
+            <h2><i class="fa-solid fa-users"></i> Management User</h2>
+            <button
+              class="btn-blue-primary"
+              onclick="bukaModalUser()"
+              style="
+                width: auto;
+                background: #2563eb;
+                color: #fff;
+                padding: 10px 15px;
+                border-radius: 6px;
+                border: none;
+                cursor: pointer;
+              "
+            >
+              <i class="fa-solid fa-user-plus"></i> Tambah User Baru
+            </button>
+          </div>
+          <div class="table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Nama</th>
+                  <th>Username</th>
+                  <th>Section</th>
+                  <th>No. Telegram</th>
+                  <th>Chat ID</th>
+                  <th>Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="user-table-body">
+                <tr>
+                  <td>USR001</td>
+                  <td>Eka</td>
+                  <td>eka_gudang</td>
+                  <td>Gudang A</td>
+                  <td>0812345678</td>
+                  <td>987654321</td>
+                  <td>
+                    <button
+                      class="btn-table-edit"
+                      onclick="editUser('USR001')"
+                      style="
+                        border: none;
+                        background: none;
+                        cursor: pointer;
+                        color: #eab308;
+                        margin-right: 8px;
+                      "
+                    >
+                      <i class="fa-solid fa-edit"></i>
+                    </button>
+                    <button
+                      class="btn-table-delete"
+                      onclick="hapusUser('USR001')"
+                      style="
+                        border: none;
+                        background: none;
+                        cursor: pointer;
+                        color: #ef4444;
+                      "
+                    >
+                      <i class="fa-solid fa-trash"></i>
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div
+          id="userModal"
+          class="modal-backdrop"
+          style="
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            justify-content: center;
+            align-items: center;
+          "
+        >
+          <div
+            class="modal-content"
+            style="
+              background: #fff;
+              padding: 25px;
+              border-radius: 12px;
+              width: 450px;
+              max-width: 90%;
+            "
+          >
+            <h3 id="modal-user-title" style="margin-bottom: 15px">
+              Tambah User
+            </h3>
+            <input type="hidden" id="user-id" />
+            <div class="form-group" style="margin-bottom: 12px">
+              <label>Nama Lengkap</label
+              ><input type="text" id="user-nama" class="form-control" />
+            </div>
+            <div class="form-group" style="margin-bottom: 12px">
+              <label>Username</label
+              ><input type="text" id="user-username" class="form-control" />
+            </div>
+            <div class="form-group" style="margin-bottom: 12px">
+              <label>Password</label
+              ><input type="password" id="user-password" class="form-control" />
+            </div>
+            <div class="form-group" style="margin-bottom: 12px">
+              <label>Section / Bagian</label
+              ><input
+                type="text"
+                id="user-section"
+                class="form-control"
+                placeholder="Contoh: Gudang A, ME, BW"
+              />
+            </div>
+            <div class="form-group" style="margin-bottom: 12px">
+              <label>Nomor Telegram</label
+              ><input type="text" id="user-telegram" class="form-control" />
+            </div>
+            <div class="form-group" style="margin-bottom: 15px">
+              <label>Chat ID Telegram</label
+              ><input type="text" id="user-chatid" class="form-control" />
+            </div>
+            <div style="display: flex; justify-content: flex-end; gap: 10px">
+              <button
+                onclick="tutupModalUser()"
+                style="
+                  background: #cbd5e1;
+                  border: none;
+                  padding: 8px 15px;
+                  border-radius: 6px;
+                  cursor: pointer;
+                "
+              >
+                Batal
+              </button>
+              <button
+                onclick="prosesSimpanUser()"
+                style="
+                  background: #2563eb;
+                  color: #fff;
+                  border: none;
+                  padding: 8px 15px;
+                  border-radius: 6px;
+                  cursor: pointer;
+                "
+              >
+                Simpan Data
+              </button>
+            </div>
+          </div>
+        </div>
+      </main>
     </div>
 
     <script src="script.js"></script>
-    
     <script>
-        // 1. FUNGSI SWAP FORM IN / OUT
-        function toggleFormTransaksi() {
-            const tipe = document.getElementById('tipe-transaksi').value;
-            const formIn = document.getElementById('form-in-fields');
-            const formOut = document.getElementById('form-out-fields');
-
-            if (tipe === 'in') {
-                formIn.style.display = 'block';
-                formOut.style.display = 'none';
-            } else {
-                formIn.style.display = 'none';
-                formOut.style.display = 'block';
-            }
-        }
-
-        // 2. FUNGSI NAVIGASI PINDAH HALAMAN SIDEBAR
-        document.addEventListener('DOMContentLoaded', () => {
-            const menuDashboard = document.getElementById('menu-dashboard');
-            const menuInventori = document.getElementById('menu-inventori');
-            const menuTransaksi = document.getElementById('menu-transaksi');
-
-            const secDashboard = document.getElementById('dashboard-section');
-            const secInventori = document.getElementById('inventori-section');
-            const secTransaksi = document.getElementById('transaksi-section');
-            
-            const pageTitle = document.getElementById('page-title');
-
-            function switchPage(activeMenu, activeSection, title) {
-                // Sembunyikan semua section & hilangkan class active di menu
-                [menuDashboard, menuInventori, menuTransaksi].forEach(m => { if(m) m.classList.remove('active') });
-                [secDashboard, secInventori, secTransaksi].forEach(s => { if(s) s.classList.remove('active') });
-                
-                // Aktifkan yang dipilih
-                if(activeMenu) activeMenu.classList.add('active');
-                if(activeSection) activeSection.classList.add('active');
-                if(pageTitle) pageTitle.textContent = title;
-            }
-
-            if(menuDashboard && secDashboard) {
-                menuDashboard.addEventListener('click', (e) => { e.preventDefault(); switchPage(menuDashboard, secDashboard, 'Dashboard'); });
-            }
-            if(menuInventori && secInventori) {
-                menuInventori.addEventListener('click', (e) => { e.preventDefault(); switchPage(menuInventori, secInventori, 'Manajemen Inventori'); });
-            }
-            if(menuTransaksi && secTransaksi) {
-                menuTransaksi.addEventListener('click', (e) => { e.preventDefault(); switchPage(menuTransaksi, secTransaksi, 'Transaksi Barang'); });
-            }
+      // 1. GLOBAL ROUTER NAVIGATION (Memperbaiki Sistem Navigasi yang Rusak)
+      function switchPage(pageId, title) {
+        // Sembunyikan semua page section yang ada
+        const allSections = document.querySelectorAll(".page-section");
+        allSections.forEach((section) => {
+          section.style.display = "none";
+          section.classList.remove("active");
         });
 
-        // 3. TOGGLE SIDEBAR MOBILE
-        const sidebar = document.querySelector('.sidebar');
-        const sidebarToggle = document.getElementById('sidebar-toggle');
-        const overlay = document.getElementById('sidebar-overlay');
+        // Hilangkan status active dari semua menu list di sidebar
+        const allMenuItems = document.querySelectorAll(".nav-links li");
+        allMenuItems.forEach((item) => item.classList.remove("active"));
 
-        function toggleSidebar() {
-            sidebar.classList.toggle('active');
-            overlay.classList.toggle('active');
+        // Tampilkan section target
+        const targetSection = document.getElementById(pageId + "-section");
+        if (targetSection) {
+          targetSection.style.display = "block";
+          targetSection.classList.add("active");
         }
 
-        if (sidebarToggle && overlay) {
-            sidebarToggle.addEventListener('click', toggleSidebar);
-            overlay.addEventListener('click', toggleSidebar);
+        // Berikan status active pada menu yang dipilih
+        const targetMenu = document.getElementById("menu-" + pageId);
+        if (targetMenu) {
+          targetMenu.classList.add("active");
         }
+
+        // Ubah teks judul header atas halaman
+        const pageTitle = document.getElementById("page-title");
+        if (pageTitle && title) {
+          pageTitle.textContent = title;
+        }
+
+        // Otomatis tutup overlay jika di perangkat seluler
+        const sidebar = document.querySelector(".sidebar");
+        const overlay = document.getElementById("sidebar-overlay");
+        if (sidebar && sidebar.classList.contains("active")) {
+          sidebar.classList.remove("active");
+          if (overlay) overlay.classList.remove("active");
+        }
+      }
+
+      // 2. FORM INTERFACE INTERACTION
+      function toggleFormTransaksi() {
+        const tipe = document.getElementById("tipe-transaksi").value;
+        const formIn = document.getElementById("form-in-fields");
+        const formOut = document.getElementById("form-out-fields");
+        if (tipe === "in") {
+          formIn.style.display = "block";
+          formOut.style.display = "none";
+        } else {
+          formIn.style.display = "none";
+          formOut.style.display = "block";
+        }
+      }
+
+      // 3. RESPONSIVE SIDEBAR MOBILE ACTION
+      document.addEventListener("DOMContentLoaded", () => {
+        const sidebarToggle = document.getElementById("sidebar-toggle");
+        const overlay = document.getElementById("sidebar-overlay");
+        const sidebar = document.querySelector(".sidebar");
+
+        if (sidebarToggle && overlay && sidebar) {
+          sidebarToggle.addEventListener("click", () => {
+            sidebar.classList.toggle("active");
+            overlay.classList.toggle("active");
+          });
+          overlay.addEventListener("click", () => {
+            sidebar.classList.remove("active");
+            overlay.classList.remove("active");
+          });
+        }
+      });
+
+      // 4. MANAGEMENT USER & OPNAME MODAL CONTROL
+      function bukaModalUser() {
+        document.getElementById("userModal").style.display = "flex";
+      }
+      function tutupModalUser() {
+        document.getElementById("userModal").style.display = "none";
+      }
+      function prosesSimpanUser() {
+        alert("Proses simpan ke database Google Sheets berhasil!");
+        tutupModalUser();
+      }
+      function editUser(id) {
+        alert("Memuat data user ID: " + id);
+        bukaModalUser();
+      }
+      function hapusUser(id) {
+        confirm("Yakin ingin menghapus user " + id + "?");
+      }
+      function cariDataBarangMaster() {
+        alert("Mencari ID Barang di lembar Sheet Barang...");
+      }
+      function simpanDataOpname() {
+        alert("Data stock opname berhasil dikirim!");
+      }
     </script>
-</body>
+  </body>
 </html>
