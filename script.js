@@ -1,7 +1,7 @@
 // ==========================================
 // 1. KONFIGURASI API & STATE GLOBAL
 // ==========================================
-const API_URL = "https://script.google.com/macros/s/AKfycbz7l4u67sCwXbIt0epscvHisp7Mg9DeTeZcZYuUPc8KWsT9FbfXIUdKG4Al1KNOPi8j/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbwVvTt-KmP-mwOmMckvEneZruHQYCYabveiFu8t0qMmDTof5G5mSKt-YnmTFv1SrQcj/exec";
 
 // Brankas Penyimpanan Data Utama
 let globalInventoryData = [];       // Menyimpan database semua barang dari Sheets
@@ -16,6 +16,10 @@ async function fetchDashboardData() {
     document.getElementById('total-barang').innerText = '...';
     document.getElementById('stok-rendah').innerText = '...';
     document.getElementById('transaksi-hari-ini').innerText = '...';
+    
+    // REVISI: Inisialisasi status memuat untuk Card Transaksi Bulan Ini
+    const txtBulanIni = document.getElementById('transaksi-bulan-ini');
+    if (txtBulanIni) txtBulanIni.innerText = '...';
     
     const tabelBody = document.getElementById('transaction-table-body');
     if (tabelBody) {
@@ -33,6 +37,9 @@ async function fetchDashboardData() {
             document.getElementById('total-barang').innerText = data.total_barang || 0;
             document.getElementById('stok-rendah').innerText = data.stok_rendah || 0;
             document.getElementById('transaksi-hari-ini').innerText = data.transaksi_hari_ini || 0;
+            
+            // REVISI: Tampilkan data transaksi bulan ini yang dikirim dari server
+            if (txtBulanIni) txtBulanIni.innerText = data.transaksi_bulan_ini || 0;
 
             if (tabelBody && data.transaksi) {
                 tabelBody.innerHTML = ''; 
@@ -67,6 +74,8 @@ async function fetchDashboardData() {
         document.getElementById('total-barang').innerText = 'Err';
         document.getElementById('stok-rendah').innerText = 'Err';
         document.getElementById('transaksi-hari-ini').innerText = 'Err';
+        if (txtBulanIni) txtBulanIni.innerText = 'Err'; // REVISI
+        
         if (tabelBody) tabelBody.innerHTML = `<tr><td colspan="4" style="text-align:center; color: #e63946;">Gagal terhubung ke database.</td></tr>`;
     }
 }
@@ -161,7 +170,6 @@ document.getElementById('btnSync')?.addEventListener('click', function(e) {
 // 4. LOGIKA TRANSAKSI (Cari, Keranjang, Upload, Submit)
 // ==========================================
 
-// A. Pencarian Live Dropdown (Menggunakan Event Delegation & Data Attributes)
 function initFungsiPencarianBarang() {
     const inputSearch = document.getElementById('txSearchInput');
     const dropdown = document.getElementById('searchDropdown');
@@ -169,7 +177,6 @@ function initFungsiPencarianBarang() {
 
     if (!inputSearch || !dropdown) return;
 
-    // EVENT 1: Saat Mengetik
     inputSearch.addEventListener('input', function() {
         const keyword = this.value.trim().toLowerCase();
         
@@ -187,7 +194,6 @@ function initFungsiPencarianBarang() {
         } else {
             let htmlItems = '';
             hasilFilter.forEach(item => {
-                // Konversi karakter khusus agar tidak merusak HTML tag
                 const safeNama = (item.nama || '').replace(/'/g, "&#39;").replace(/"/g, "&quot;");
                 
                 htmlItems += `
@@ -209,13 +215,11 @@ function initFungsiPencarianBarang() {
         dropdown.style.display = 'block';
     });
 
-    // EVENT 2: Klik pada List Dropdown (Event Delegation)
     dropdown.addEventListener('click', function(e) {
         const targetItem = e.target.closest('.dropdown-item-pilihan');
         
         if (targetItem) {
             const id = targetItem.getAttribute('data-id');
-            // Decode kembali entity string untuk ditampilkan di input form
             const nama = targetItem.getAttribute('data-nama').replace(/&#39;/g, "'").replace(/&quot;/g, '"');
             const stok = parseInt(targetItem.getAttribute('data-stok') || 0);
 
@@ -230,7 +234,6 @@ function initFungsiPencarianBarang() {
         }
     });
 
-    // EVENT 3: Tutup dropdown jika klik di luar form
     document.addEventListener('click', (e) => {
         if (!inputSearch.contains(e.target) && !dropdown.contains(e.target)) {
             dropdown.style.display = 'none';
@@ -238,7 +241,6 @@ function initFungsiPencarianBarang() {
     });
 }
 
-// B. Tambah ke Keranjang
 function tambahKeKeranjang() {
     if (!selectedProduct) {
         alert("Silakan cari dan pilih barang dari dropdown terlebih dahulu!");
@@ -266,7 +268,6 @@ function tambahKeKeranjang() {
         transactionCart.push({ ...selectedProduct, qty: qty });
     }
 
-    // Reset Form Input Pilihan Kiri
     document.getElementById('txSearchInput').value = '';
     if (qtyInput) qtyInput.value = 1;
     document.getElementById('tx-product-preview').innerHTML = '';
@@ -275,11 +276,9 @@ function tambahKeKeranjang() {
     renderKeranjang();
 }
 
-// C. Render UI Keranjang
 function renderKeranjang() {
     let cartContainer = document.getElementById('tx-cart-container');
     
-    // Auto-create container jika belum ada di HTML (fallback preventif)
     if (!cartContainer) {
         const addGroup = document.querySelector('.qty-input') || document.querySelector('.btn-add-list').parentElement;
         if (addGroup) {
@@ -325,7 +324,6 @@ window.hapusItemKeranjang = function(index) {
     renderKeranjang();
 };
 
-// D. Upload Foto Base-64
 function initFungsiUploadFoto() {
     const photoInput = document.getElementById('transaction-photo');
     const previewContainer = document.getElementById('photo-preview-container');
@@ -383,13 +381,11 @@ function showToast(message, type = 'success') {
     
     document.body.appendChild(toast);
     
-    // Animasi masuk
     setTimeout(() => {
         toast.style.opacity = '1';
         toast.style.transform = 'translateY(0)';
     }, 10);
 
-    // Animasi keluar setelah 3 detik
     setTimeout(() => {
         toast.style.opacity = '0';
         toast.style.transform = 'translateY(20px)';
@@ -398,7 +394,7 @@ function showToast(message, type = 'success') {
 }
 
 // ==========================================
-// UPDATE: FUNGSI SIMPAN TRANSAKSI
+// FUNGSI SIMPAN TRANSAKSI
 // ==========================================
 async function simpanSeluruhTransaksi() {
     if (transactionCart.length === 0) {
@@ -438,16 +434,13 @@ async function simpanSeluruhTransaksi() {
     btnSave.disabled = true;
 
     try {
-        // PERBAIKAN: Hapus headers json dan no-cors agar lolos dari blokir Google Script
         await fetch(API_URL, {
             method: 'POST',
             body: JSON.stringify(payload) 
         });
 
-        // Tampilkan Notifikasi Toast Cantik
         showToast("Sukses! Data transaksi berhasil tersimpan.");
 
-        // Bersihkan Form setelah sukses
         transactionCart = [];
         base64PhotoData = "";
         renderKeranjang();
@@ -459,7 +452,7 @@ async function simpanSeluruhTransaksi() {
         const textarea = document.querySelector('textarea');
         if (textarea) textarea.value = '';
 
-        fetchDashboardData(); // Segarkan dashboard
+        fetchDashboardData(); 
 
     } catch (error) {
         console.error(error);
@@ -470,12 +463,10 @@ async function simpanSeluruhTransaksi() {
     }
 }
 
-
 // ==========================================
 // 5. INISIALISASI HALAMAN & NAVIGASI MENU
 // ==========================================
 document.addEventListener('DOMContentLoaded', () => {
-    // Navigasi Section
     const menus = {
         'dashboard': document.getElementById('menu-dashboard'),
         'inventori': document.getElementById('menu-inventori'),
@@ -505,29 +496,28 @@ document.addEventListener('DOMContentLoaded', () => {
             fetchInventoryData(); 
         } else if (pageName === 'transaksi') {
             if (pageTitle) pageTitle.innerText = "Transaksi Barang";
-            renderKeranjang(); // Tampilkan keranjang kosong
+            renderKeranjang(); 
         }
     }
+
+    // REVISI UTAMA: Ekspos fungsi ke tingkat window agar bisa dipanggil oleh atribut `onclick` di HTML dashboard
+    window.switchPage = switchPage;
 
     Object.keys(menus).forEach(key => {
         menus[key]?.addEventListener('click', (e) => { 
             e.preventDefault(); 
             switchPage(key); 
-            // Tutup sidebar di versi mobile saat menu diklik
             document.querySelector('.sidebar')?.classList.remove('active');
             document.getElementById('sidebar-overlay')?.classList.remove('active');
         });
     });
 
-    // Setup Aksi Tombol Transaksi
     document.getElementById('txAddBtn')?.addEventListener('click', (e) => { e.preventDefault(); tambahKeKeranjang(); });
     document.querySelector('.btn-save-transaksi')?.addEventListener('click', (e) => { e.preventDefault(); simpanSeluruhTransaksi(); });
     
-    // Inisialisasi Fungsi Form & Upload Foto
     initFungsiPencarianBarang();
     initFungsiUploadFoto();
 
-    // Pemuatan awal sistem saat web dibuka
     fetchDashboardData();
 });
 
@@ -554,7 +544,6 @@ themeToggleBtn?.addEventListener('click', () => {
     }
 });
 
-// Toggle Menu Profil
 const profileMenu = document.getElementById('profile-menu');
 const dropdownMenu = document.getElementById('dropdown-menu');
 
