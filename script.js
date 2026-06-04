@@ -1,7 +1,7 @@
 // ==========================================
 // 1. KONFIGURASI API & STATE GLOBAL
 // ==========================================
-const API_URL = "https://script.google.com/macros/s/AKfycbyPrlCNCf0Qb5pj71G_9YSx_-aD7hOVzpMN8h_9slDk3eCzJgqOVdOjndu9QmdWEyc5/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbyDF3Bg3B5G0d1LzFQlOT0rxI8TMd4Y-eWaqR4PPa1IIdmzt-D9CfK7hcxLD5oaM0td/exec";
 
 // Brankas Penyimpanan Data Utama
 let globalInventoryData = [];       // Menyimpan database semua barang dari Sheets
@@ -351,10 +351,58 @@ function initFungsiUploadFoto() {
     });
 }
 
-// E. Submit Data Transaksi
+// ==========================================
+// FUNGSI NOTIFIKASI TOAST CANTIK
+// ==========================================
+function showToast(message, type = 'success') {
+    const toast = document.createElement('div');
+    toast.innerHTML = type === 'success' 
+        ? `<i class="fa-solid fa-circle-check"></i> ${message}` 
+        : `<i class="fa-solid fa-circle-xmark"></i> ${message}`;
+    
+    toast.style.cssText = `
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        background-color: ${type === 'success' ? '#2bc47a' : '#e63946'};
+        color: white;
+        padding: 12px 24px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        font-family: inherit;
+        font-size: 14px;
+        font-weight: 500;
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        opacity: 0;
+        transform: translateY(20px);
+        transition: all 0.3s ease;
+    `;
+    
+    document.body.appendChild(toast);
+    
+    // Animasi masuk
+    setTimeout(() => {
+        toast.style.opacity = '1';
+        toast.style.transform = 'translateY(0)';
+    }, 10);
+
+    // Animasi keluar setelah 3 detik
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(20px)';
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
+}
+
+// ==========================================
+// UPDATE: FUNGSI SIMPAN TRANSAKSI
+// ==========================================
 async function simpanSeluruhTransaksi() {
     if (transactionCart.length === 0) {
-        alert("Harap masukkan minimal 1 barang ke dalam daftar transaksi.");
+        showToast("Harap masukkan minimal 1 barang ke keranjang!", "error");
         return;
     }
 
@@ -390,14 +438,14 @@ async function simpanSeluruhTransaksi() {
     btnSave.disabled = true;
 
     try {
+        // PERBAIKAN: Hapus headers json dan no-cors agar lolos dari blokir Google Script
         await fetch(API_URL, {
             method: 'POST',
-            mode: 'no-cors', 
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
+            body: JSON.stringify(payload) 
         });
 
-        alert("Sukses! Data transaksi berhasil tersimpan.");
+        // Tampilkan Notifikasi Toast Cantik
+        showToast("Sukses! Data transaksi berhasil tersimpan.");
 
         // Bersihkan Form setelah sukses
         transactionCart = [];
@@ -411,30 +459,16 @@ async function simpanSeluruhTransaksi() {
         const textarea = document.querySelector('textarea');
         if (textarea) textarea.value = '';
 
-        // Segarkan Dashboard otomatis
-        fetchDashboardData();
+        fetchDashboardData(); // Segarkan dashboard
 
     } catch (error) {
         console.error(error);
-        alert("Gagal koneksi saat menyimpan data transaksi.");
+        showToast("Gagal terhubung ke server saat menyimpan data.", "error");
     } finally {
         btnSave.innerHTML = originalText;
         btnSave.disabled = false;
     }
 }
-
-// Toggle form inputs berdasarkan Tipe Transaksi
-function toggleFormTransaksi() {
-    const tipe = document.getElementById('tipe-transaksi')?.value;
-    const formIn = document.getElementById('form-in-fields');
-    const formOut = document.getElementById('form-out-fields');
-    if (formIn && formOut) {
-        formIn.style.display = (tipe === 'in') ? 'block' : 'none';
-        formOut.style.display = (tipe === 'out') ? 'block' : 'none';
-    }
-}
-
-document.getElementById('tipe-transaksi')?.addEventListener('change', toggleFormTransaksi);
 
 
 // ==========================================
