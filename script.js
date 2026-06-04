@@ -185,9 +185,12 @@ function initFungsiPencarianBarang() {
         } else {
             let htmlItems = '';
             hasilFilter.forEach(item => {
+                // PERBAIKAN: Mengamankan tanda kutip ganda (") dan tunggal (') agar bisa diklik
+                const safeNama = (item.nama || '').replace(/'/g, "\\'").replace(/"/g, "&quot;");
+                
                 htmlItems += `
                     <div style="padding: 10px; cursor: pointer; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;"
-                         onclick="pilihItemDariDropdown('${item.id}', '${item.nama.replace(/'/g, "\\'")}', ${item.stok})">
+                         onclick="pilihItemDariDropdown('${item.id}', '${safeNama}', ${item.stok})">
                         <div>
                             <strong style="display:block; font-size:13px; color: #1e293b;">${item.nama}</strong>
                             <span style="font-size:11px; color:#94a3b8;">SKU: ${item.id}</span>
@@ -208,19 +211,6 @@ function initFungsiPencarianBarang() {
         }
     });
 }
-
-// Terpilih dari dropdown
-window.pilihItemDariDropdown = function(id, nama, stok) {
-    document.getElementById('txSearchInput').value = nama;
-    document.getElementById('searchDropdown').style.display = 'none';
-    
-    selectedProduct = { id, nama, stok };
-    
-    const previewLabel = document.getElementById('tx-product-preview');
-    if (previewLabel) {
-        previewLabel.innerHTML = `<span style="color: #2bc47a;"><i class="fa-solid fa-circle-check"></i> Terpilih: <strong>${nama}</strong> | Stok Saat Ini: ${stok}</span>`;
-    }
-};
 
 // B. Tambah ke Keranjang
 function tambahKeKeranjang() {
