@@ -1,7 +1,7 @@
 // ==========================================
 // 1. KONFIGURASI API & STATE GLOBAL
 // ==========================================
-const API_URL = "https://script.google.com/macros/s/AKfycbyDF3Bg3B5G0d1LzFQlOT0rxI8TMd4Y-eWaqR4PPa1IIdmzt-D9CfK7hcxLD5oaM0td/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbz7l4u67sCwXbIt0epscvHisp7Mg9DeTeZcZYuUPc8KWsT9FbfXIUdKG4Al1KNOPi8j/exec";
 
 // Brankas Penyimpanan Data Utama
 let globalInventoryData = [];       // Menyimpan database semua barang dari Sheets
